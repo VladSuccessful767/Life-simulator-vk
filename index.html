@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101722"><title>Жизнь: Новый старт</title><link rel="stylesheet" href="style.css"></head>
+<body><main class="app">
+<header><div><div class="eyebrow">ЖИЗНЬ: НОВЫЙ СТАРТ</div><h1 id="name">Влад</h1></div><button id="reset">↻</button></header>
+<section class="hud"><div class="avatar">🙂</div><div class="bars"><b>Уровень <span id="level">1</span></b><div class="xp"><i id="xp"></i></div><div class="nums">💰 <strong id="money">1 000 ₽</strong> · ⚡ <strong id="energy">100</strong> · ❤️ <strong id="health">80</strong> · ⭐ <strong id="rep">0</strong></div></div></section>
+<section class="city"><div class="sky">🏙️ <span>МОЙ ГОРОД</span></div>
+<div class="road r1"></div><div class="road r2"></div>
+<button class="building b-home" data-place="home"><span>🏠</span><b>Квартира</b><small>Отдых и жильё</small></button>
+<button class="building b-work" data-place="work"><span>💼</span><b>Работа</b><small>Заработать деньги</small></button>
+<button class="building b-study" data-place="study"><span>🎓</span><b>Университет</b><small>Получить навыки</small></button>
+<button class="building b-gym" data-place="gym"><span>🏋️</span><b>Фитнес</b><small>Здоровье</small></button>
+<button class="building b-auto" data-place="auto"><span>🚗</span><b>Автосалон</b><small>Машины</small></button>
+<button class="building b-shop" data-place="shop"><span>🛒</span><b>Магазин</b><small>Привилегии</small></button>
+</section>
+<section class="goals"><div class="title">🎯 Цели</div><div id="goals"></div></section>
+<nav><button class="active">🏙️<small>Город</small></button><button id="hero">👤<small>Герой</small></button><button id="items">🎒<small>Имущество</small></button><button id="shop">🛒<small>Магазин</small></button><button id="rating">🏆<small>Рейтинг</small></button></nav>
+<div class="modal" id="modal"><div class="modalBox"><button class="close" id="close">×</button><div id="modalContent"></div></div></div>
+<footer>Версия 0.2 · Город</footer></main><script src="game.js"></script></body></html>
