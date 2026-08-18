@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#10131a">
+  <title>Жизнь: Новый старт</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <div>
+        <div class="eyebrow">СИМУЛЯТОР ЖИЗНИ</div>
+        <h1>Новый старт</h1>
+      </div>
+      <button id="resetBtn" class="iconBtn" title="Новая игра">↻</button>
+    </header>
+
+    <section class="card profile">
+      <div class="avatar" id="avatar">🙂</div>
+      <div class="profileInfo">
+        <div class="name" id="playerName">Новичок</div>
+        <div class="level">Уровень <b id="level">1</b> · <span id="xp">0</span>/<span id="xpNeed">100</span> XP</div>
+        <div class="progress"><i id="xpBar"></i></div>
+      </div>
+    </section>
+
+    <section class="stats">
+      <div class="stat"><span>💰</span><b id="money">1 000 ₽</b><small>Деньги</small></div>
+      <div class="stat"><span>⚡</span><b id="energy">100</b><small>Энергия</small></div>
+      <div class="stat"><span>❤️</span><b id="health">80</b><small>Здоровье</small></div>
+      <div class="stat"><span>⭐</span><b id="rep">0</b><small>Репутация</small></div>
+    </section>
+
+    <section class="tabs">
+      <button class="tab active" data-tab="life">Жизнь</button>
+      <button class="tab" data-tab="shop">Привилегии</button>
+      <button class="tab" data-tab="profile">Профиль</button>
+    </section>
+
+    <section id="life" class="panel active">
+      <div class="sectionTitle">Что делать сегодня?</div>
+      <div class="actions">
+        <button class="action" data-action="work">
+          <span>💼</span><div><b>Поработать</b><small>+250 ₽ · −20 энергии · +15 XP</small></div>
+        </button>
+        <button class="action" data-action="study">
+          <span>📚</span><div><b>Учиться</b><small>−15 энергии · +25 XP · шанс на повышение</small></div>
+        </button>
+        <button class="action" data-action="rest">
+          <span>🛋️</span><div><b>Отдохнуть</b><small>+35 энергии · +5 здоровья</small></div>
+        </button>
+        <button class="action" data-action="health">
+          <span>🏃</span><div><b>Заняться собой</b><small>−10 энергии · +12 здоровья · +10 XP</small></div>
+        </button>
+      </div>
+
+      <div class="sectionTitle">Событие дня</div>
+      <div class="event cardInner" id="eventBox">
+        <div class="eventEmoji">🎲</div>
+        <div><b id="eventTitle">День только начинается</b><p id="eventText">Выбери действие и попробуй изменить свою жизнь.</p></div>
+      </div>
+    </section>
+
+    <section id="shop" class="panel">
+      <div class="sectionTitle">Внутренние привилегии</div>
+      <p class="hint">В прототипе покупки виртуальные. Для релиза в VK подключается реальная платежная система/серверная проверка.</p>
+      <div id="shopList"></div>
+    </section>
+
+    <section id="profile" class="panel">
+      <div class="sectionTitle">Твоя история</div>
+      <div class="history cardInner" id="history"></div>
+      <button class="wide" id="nameBtn">Изменить имя</button>
+    </section>
+
+    <footer>Жизнь: Новый старт · прототип VK Mini App</footer>
+  </main>
+  <div class="toast" id="toast"></div>
+  <script src="game.js"></script>
+</body>
+</html>
