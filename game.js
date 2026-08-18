@@ -14,13 +14,18 @@ let s = JSON.parse(localStorage.getItem(K) || "null") || {
     career: 0,
     intelligence: 20,
     form: 50,
-    job: "Безработный"
+    job: "Безработный",
+    education: "Нет",
+    educationLevel: 0
 };
 
+/* Совместимость со старым сохранением */
 s.career = s.career ?? 0;
 s.intelligence = s.intelligence ?? 20;
 s.form = s.form ?? 50;
 s.job = s.job ?? "Безработный";
+s.education = s.education ?? "Нет";
+s.educationLevel = s.educationLevel ?? 0;
 
 const $ = x => document.getElementById(x);
 
@@ -46,6 +51,7 @@ function render() {
         Math.min(100, s.xp / need() * 100) + "%";
 
     $("goals").innerHTML = `
+
         <div class="goal">
             <span>💰 Накопить 10 000 ₽</span>
             <b>${Math.min(100, Math.floor(s.money / 100))}%</b>
@@ -65,8 +71,13 @@ function render() {
             <span>🏠 Улучшить жильё</span>
             <b>${s.home === "Комната" ? "○" : "✓"}</b>
         </div>
+
     `;
 }
+
+/* =========================
+   ОПЫТ И УРОВНИ
+========================= */
 
 function xp(n) {
 
@@ -75,25 +86,38 @@ function xp(n) {
     while (s.xp >= need()) {
 
         s.xp -= need();
+
         s.level++;
 
         s.money += 500;
+
         s.rep += 2;
 
-        toast("🎉 Новый уровень! +500 ₽");
+        toast(
+            "🎉 Новый уровень! +500 ₽ и +2 ⭐ репутации"
+        );
     }
 }
+
+/* =========================
+   ОТКРЫТИЕ ЗДАНИЙ
+========================= */
 
 function open(place) {
 
     let title = "";
     let body = "";
 
+    /* =========================
+       РАБОТА
+    ========================= */
+
     if (place === "work") {
 
         title = "💼 Работа";
 
         body = `
+
             <p>
                 Твоя текущая работа:
                 <b>${s.job}</b>
@@ -148,36 +172,90 @@ function open(place) {
                 60,
                 60
             )}
+
         `;
     }
+
+    /* =========================
+       УНИВЕРСИТЕТ
+    ========================= */
 
     if (place === "study") {
 
         title = "🎓 Университет";
 
         body = `
+
             <p>
-                Обучение повышает интеллект
-                и опыт персонажа.
+                Выбери направление обучения.
+                Учёба повышает интеллект,
+                карьеру и уровень образования.
             </p>
 
             <div class="statrow">
-                <span>🧠 Интеллект</span>
-                <b>${s.intelligence}/100</b>
+                <span>🎓 Образование</span>
+                <b>${s.education}</b>
             </div>
 
+            <div class="statrow">
+                <span>📚 Уровень образования</span>
+                <b>${s.educationLevel}/100</b>
+            </div>
+
+            <hr>
+
             <button class="actionBtn"
-                onclick="study()">
-                Учиться · −15 энергии
+                onclick="study('it')">
+
+                💻 IT
+
+                <br>
+
+                <small>
+                    +8 интеллект · +2 карьера · −15 энергии
+                </small>
+
             </button>
+
+            <button class="actionBtn"
+                onclick="study('business')">
+
+                📊 Бизнес
+
+                <br>
+
+                <small>
+                    +6 интеллект · +5 карьера · −15 энергии
+                </small>
+
+            </button>
+
+            <button class="actionBtn"
+                onclick="study('engineering')">
+
+                ⚙️ Инженерия
+
+                <br>
+
+                <small>
+                    +7 интеллект · +4 карьера · −15 энергии
+                </small>
+
+            </button>
+
         `;
     }
+
+    /* =========================
+       ФИТНЕС
+    ========================= */
 
     if (place === "gym") {
 
         title = "🏋️ Фитнес";
 
         body = `
+
             <p>
                 Тренировки повышают форму
                 и здоровье.
@@ -188,18 +266,31 @@ function open(place) {
                 <b>${s.form}/100</b>
             </div>
 
+            <div class="statrow">
+                <span>❤️ Здоровье</span>
+                <b>${s.health}/100</b>
+            </div>
+
             <button class="actionBtn"
                 onclick="gym()">
+
                 Тренироваться · −10 энергии
+
             </button>
+
         `;
     }
+
+    /* =========================
+       КВАРТИРА
+    ========================= */
 
     if (place === "home") {
 
         title = "🏠 Квартира";
 
         body = `
+
             <p>
                 Сейчас у тебя:
                 <b>${s.home}</b>
@@ -207,16 +298,24 @@ function open(place) {
 
             <button class="actionBtn"
                 onclick="rest()">
-                Отдохнуть · +35 энергии
+
+                😴 Отдохнуть · +35 энергии
+
             </button>
+
         `;
     }
+
+    /* =========================
+       АВТОСАЛОН
+    ========================= */
 
     if (place === "auto") {
 
         title = "🚗 Автосалон";
 
         body = `
+
             <p>
                 Твоя машина:
                 <b>${s.car}</b>
@@ -224,16 +323,24 @@ function open(place) {
 
             <button class="actionBtn"
                 onclick="buyCar()">
-                Купить первую машину · 5 000 ₽
+
+                🚗 Купить первую машину · 5 000 ₽
+
             </button>
+
         `;
     }
+
+    /* =========================
+       МАГАЗИН
+    ========================= */
 
     if (place === "shop") {
 
         title = "🛒 Магазин";
 
         body = `
+
             <p>
                 Здесь позже появятся одежда,
                 предметы и премиальные привилегии.
@@ -241,8 +348,11 @@ function open(place) {
 
             <button class="actionBtn"
                 onclick="toast('Скоро здесь будет магазин')">
+
                 Открыть магазин
+
             </button>
+
         `;
     }
 
@@ -251,6 +361,10 @@ function open(place) {
 
     $("modal").classList.add("show");
 }
+
+/* =========================
+   ВАКАНСИИ
+========================= */
 
 function jobButton(
     type,
@@ -268,48 +382,68 @@ function jobButton(
     if (unlocked) {
 
         return `
+
             <button class="actionBtn"
                 onclick="work('${type}')">
 
                 ${name} · ${salary.toLocaleString("ru-RU")} ₽
+
                 <br>
-                <small>−${energy} энергии</small>
+
+                <small>
+                    −${energy} энергии
+                </small>
 
             </button>
+
         `;
     }
 
     let requirements = [];
 
     if (s.intelligence < intelligence) {
+
         requirements.push(
             `🧠 интеллект ${intelligence}`
         );
     }
 
     if (s.career < career) {
+
         requirements.push(
             `💼 карьера ${career}`
         );
     }
 
     return `
+
         <button class="actionBtn"
             style="opacity:.45"
             onclick="lockedJob('${requirements.join(" · ")}')">
 
             🔒 ${name} · ${salary.toLocaleString("ru-RU")} ₽
+
             <br>
-            <small>${requirements.join(" · ")}</small>
+
+            <small>
+                ${requirements.join(" · ")}
+            </small>
 
         </button>
+
     `;
 }
 
 function lockedJob(requirements) {
 
-    toast("🔒 Пока недоступно: " + requirements);
+    toast(
+        "🔒 Пока недоступно: " + requirements
+    );
 }
+
+/* =========================
+   ЭНЕРГИЯ
+========================= */
 
 function spend(n) {
 
@@ -325,19 +459,26 @@ function spend(n) {
     return true;
 }
 
+/* =========================
+   РАБОТА
+========================= */
+
 function work(type) {
 
     const jobs = {
 
         courier: {
+
             name: "Курьер",
             money: 250,
             energy: 20,
             career: 3,
             xp: 15
+
         },
 
         seller: {
+
             name: "Продавец",
             money: 450,
             energy: 20,
@@ -345,9 +486,11 @@ function work(type) {
             xp: 20,
             intelligence: 25,
             requiredCareer: 10
+
         },
 
         manager: {
+
             name: "Менеджер",
             money: 750,
             energy: 25,
@@ -355,9 +498,11 @@ function work(type) {
             xp: 30,
             intelligence: 40,
             requiredCareer: 30
+
         },
 
         programmer: {
+
             name: "Программист",
             money: 1200,
             energy: 30,
@@ -365,6 +510,7 @@ function work(type) {
             xp: 45,
             intelligence: 60,
             requiredCareer: 60
+
         }
 
     };
@@ -411,7 +557,9 @@ function work(type) {
     xp(job.xp);
 
     close();
+
     render();
+
     save();
 
     toast(
@@ -419,23 +567,82 @@ function work(type) {
     );
 }
 
-function study() {
+/* =========================
+   УНИВЕРСИТЕТ
+========================= */
+
+function study(type) {
+
+    const courses = {
+
+        it: {
+
+            name: "💻 IT",
+            intelligence: 8,
+            career: 2,
+            xp: 30
+
+        },
+
+        business: {
+
+            name: "📊 Бизнес",
+            intelligence: 6,
+            career: 5,
+            xp: 30
+
+        },
+
+        engineering: {
+
+            name: "⚙️ Инженерия",
+            intelligence: 7,
+            career: 4,
+            xp: 30
+
+        }
+
+    };
+
+    const course = courses[type];
+
+    if (!course) return;
 
     if (!spend(15)) return;
 
-    s.intelligence = Math.min(
+    s.education = course.name;
+
+    s.educationLevel = Math.min(
         100,
-        s.intelligence + 5
+        s.educationLevel + 10
     );
 
-    xp(25);
+    s.intelligence = Math.min(
+        100,
+        s.intelligence + course.intelligence
+    );
+
+    s.career = Math.min(
+        100,
+        s.career + course.career
+    );
+
+    xp(course.xp);
 
     close();
+
     render();
+
     save();
 
-    toast("🎓 +5 интеллекта · +25 XP");
+    toast(
+        `${course.name}: образование улучшено`
+    );
 }
+
+/* =========================
+   ФИТНЕС
+========================= */
 
 function gym() {
 
@@ -454,11 +661,19 @@ function gym() {
     xp(10);
 
     close();
+
     render();
+
     save();
 
-    toast("💪 +5 формы · +12 здоровья");
+    toast(
+        "💪 +5 формы · +12 здоровья"
+    );
 }
+
+/* =========================
+   ОТДЫХ
+========================= */
 
 function rest() {
 
@@ -473,37 +688,58 @@ function rest() {
     );
 
     close();
+
     render();
+
     save();
 
-    toast("😴 Отдых помог");
+    toast(
+        "😴 Отдых помог"
+    );
 }
+
+/* =========================
+   АВТОМОБИЛЬ
+========================= */
 
 function buyCar() {
 
     if (s.car !== "Нет") {
 
-        toast("🚗 Машина уже есть");
+        toast(
+            "🚗 Машина уже есть"
+        );
 
         return;
     }
 
     if (s.money < 5000) {
 
-        toast("💰 Нужно 5 000 ₽");
+        toast(
+            "💰 Нужно 5 000 ₽"
+        );
 
         return;
     }
 
     s.money -= 5000;
+
     s.car = "Первая машина";
 
     close();
+
     render();
+
     save();
 
-    toast("🚗 Машина куплена!");
+    toast(
+        "🚗 Машина куплена!"
+    );
 }
+
+/* =========================
+   ЗАКРЫТИЕ ОКНА
+========================= */
 
 function close() {
 
@@ -515,6 +751,10 @@ function toast(t) {
     alert(t);
 }
 
+/* =========================
+   ЗДАНИЯ ГОРОДА
+========================= */
+
 document
     .querySelectorAll(".building")
     .forEach(b => {
@@ -524,7 +764,15 @@ document
 
     });
 
+/* =========================
+   КНОПКА ЗАКРЫТИЯ
+========================= */
+
 $("close").onclick = close;
+
+/* =========================
+   СБРОС
+========================= */
 
 $("reset").onclick = () => {
 
@@ -533,8 +781,13 @@ $("reset").onclick = () => {
         localStorage.removeItem(K);
 
         location.reload();
+
     }
 };
+
+/* =========================
+   ГЕРОЙ
+========================= */
 
 $("hero").onclick = () => {
 
@@ -563,6 +816,16 @@ $("hero").onclick = () => {
         </div>
 
         <div class="statrow">
+            <span>🎓 Образование</span>
+            <b>${s.education}</b>
+        </div>
+
+        <div class="statrow">
+            <span>📚 Уровень образования</span>
+            <b>${s.educationLevel}/100</b>
+        </div>
+
+        <div class="statrow">
             <span>🧠 Интеллект</span>
             <b>${s.intelligence}/100</b>
         </div>
@@ -573,13 +836,23 @@ $("hero").onclick = () => {
         </div>
 
         <div class="statrow">
+            <span>❤️ Здоровье</span>
+            <b>${s.health}/100</b>
+        </div>
+
+        <div class="statrow">
             <span>⭐ Репутация</span>
             <b>${s.rep}</b>
         </div>
+
     `;
 
     $("modal").classList.add("show");
 };
+
+/* =========================
+   ИМУЩЕСТВО
+========================= */
 
 $("items").onclick = () => {
 
@@ -596,31 +869,58 @@ $("items").onclick = () => {
             <span>🚗 Автомобиль</span>
             <b>${s.car}</b>
         </div>
+
+        <div class="statrow">
+            <span>🎓 Образование</span>
+            <b>${s.education}</b>
+        </div>
+
     `;
 
     $("modal").classList.add("show");
 };
+
+/* =========================
+   МАГАЗИН
+========================= */
 
 $("shop").onclick = () =>
     open("shop");
 
+/* =========================
+   РЕЙТИНГ
+========================= */
+
 $("rating").onclick = () => {
 
     $("modalContent").innerHTML = `
+
         <h2>🏆 Рейтинг</h2>
+
         <p>
             Скоро здесь появится рейтинг игроков VK.
         </p>
+
     `;
 
     $("modal").classList.add("show");
 };
 
+/* =========================
+   ЗАКРЫТИЕ ПО ФОНУ
+========================= */
+
 $("modal").onclick = e => {
 
     if (e.target.id === "modal") {
+
         close();
+
     }
 };
+
+/* =========================
+   ЗАПУСК
+========================= */
 
 render();
