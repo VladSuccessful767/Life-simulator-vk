@@ -31,8 +31,10 @@ function save() {
 }
 
 function render() {
+
     $("name").textContent = s.name;
     $("level").textContent = s.level;
+
     $("money").textContent =
         new Intl.NumberFormat("ru-RU").format(s.money) + " ₽";
 
@@ -67,9 +69,11 @@ function render() {
 }
 
 function xp(n) {
+
     s.xp += n;
 
     while (s.xp >= need()) {
+
         s.xp -= need();
         s.level++;
 
@@ -109,33 +113,41 @@ function open(place) {
 
             <h3>Доступные вакансии</h3>
 
-            <button class="actionBtn"
-                onclick="work('courier')">
-                🛵 Курьер · 250 ₽
-                <br>
-                <small>−20 энергии</small>
-            </button>
+            ${jobButton(
+                "courier",
+                "🛵 Курьер",
+                250,
+                20,
+                0,
+                0
+            )}
 
-            <button class="actionBtn"
-                onclick="work('seller')">
-                🛍️ Продавец · 450 ₽
-                <br>
-                <small>Интеллект 25 · −20 энергии</small>
-            </button>
+            ${jobButton(
+                "seller",
+                "🛍️ Продавец",
+                450,
+                20,
+                25,
+                10
+            )}
 
-            <button class="actionBtn"
-                onclick="work('manager')">
-                💼 Менеджер · 750 ₽
-                <br>
-                <small>Интеллект 40 · −25 энергии</small>
-            </button>
+            ${jobButton(
+                "manager",
+                "💼 Менеджер",
+                750,
+                25,
+                40,
+                30
+            )}
 
-            <button class="actionBtn"
-                onclick="work('programmer')">
-                👨‍💻 Программист · 1 200 ₽
-                <br>
-                <small>Интеллект 60 · −30 энергии</small>
-            </button>
+            ${jobButton(
+                "programmer",
+                "👨‍💻 Программист",
+                1200,
+                30,
+                60,
+                60
+            )}
         `;
     }
 
@@ -145,7 +157,8 @@ function open(place) {
 
         body = `
             <p>
-                Обучение повышает интеллект и опыт.
+                Обучение повышает интеллект
+                и опыт персонажа.
             </p>
 
             <div class="statrow">
@@ -166,7 +179,8 @@ function open(place) {
 
         body = `
             <p>
-                Тренировки повышают форму и здоровье.
+                Тренировки повышают форму
+                и здоровье.
             </p>
 
             <div class="statrow">
@@ -238,10 +252,71 @@ function open(place) {
     $("modal").classList.add("show");
 }
 
+function jobButton(
+    type,
+    name,
+    salary,
+    energy,
+    intelligence,
+    career
+) {
+
+    const unlocked =
+        s.intelligence >= intelligence &&
+        s.career >= career;
+
+    if (unlocked) {
+
+        return `
+            <button class="actionBtn"
+                onclick="work('${type}')">
+
+                ${name} · ${salary.toLocaleString("ru-RU")} ₽
+                <br>
+                <small>−${energy} энергии</small>
+
+            </button>
+        `;
+    }
+
+    let requirements = [];
+
+    if (s.intelligence < intelligence) {
+        requirements.push(
+            `🧠 интеллект ${intelligence}`
+        );
+    }
+
+    if (s.career < career) {
+        requirements.push(
+            `💼 карьера ${career}`
+        );
+    }
+
+    return `
+        <button class="actionBtn"
+            style="opacity:.45"
+            onclick="lockedJob('${requirements.join(" · ")}')">
+
+            🔒 ${name} · ${salary.toLocaleString("ru-RU")} ₽
+            <br>
+            <small>${requirements.join(" · ")}</small>
+
+        </button>
+    `;
+}
+
+function lockedJob(requirements) {
+
+    toast("🔒 Пока недоступно: " + requirements);
+}
+
 function spend(n) {
 
     if (s.energy < n) {
+
         toast("⚡ Не хватает энергии");
+
         return false;
     }
 
@@ -268,7 +343,8 @@ function work(type) {
             energy: 20,
             career: 5,
             xp: 20,
-            intelligence: 25
+            intelligence: 25,
+            requiredCareer: 10
         },
 
         manager: {
@@ -277,7 +353,8 @@ function work(type) {
             energy: 25,
             career: 8,
             xp: 30,
-            intelligence: 40
+            intelligence: 40,
+            requiredCareer: 30
         },
 
         programmer: {
@@ -286,8 +363,10 @@ function work(type) {
             energy: 30,
             career: 12,
             xp: 45,
-            intelligence: 60
+            intelligence: 60,
+            requiredCareer: 60
         }
+
     };
 
     const job = jobs[type];
@@ -298,9 +377,23 @@ function work(type) {
         job.intelligence &&
         s.intelligence < job.intelligence
     ) {
+
         toast(
             `🧠 Нужно ${job.intelligence} интеллекта`
         );
+
+        return;
+    }
+
+    if (
+        job.requiredCareer &&
+        s.career < job.requiredCareer
+    ) {
+
+        toast(
+            `💼 Нужно ${job.requiredCareer} карьеры`
+        );
+
         return;
     }
 
@@ -389,12 +482,16 @@ function rest() {
 function buyCar() {
 
     if (s.car !== "Нет") {
+
         toast("🚗 Машина уже есть");
+
         return;
     }
 
     if (s.money < 5000) {
+
         toast("💰 Нужно 5 000 ₽");
+
         return;
     }
 
@@ -409,18 +506,22 @@ function buyCar() {
 }
 
 function close() {
+
     $("modal").classList.remove("show");
 }
 
 function toast(t) {
+
     alert(t);
 }
 
 document
     .querySelectorAll(".building")
     .forEach(b => {
+
         b.onclick = () =>
             open(b.dataset.place);
+
     });
 
 $("close").onclick = close;
@@ -428,7 +529,9 @@ $("close").onclick = close;
 $("reset").onclick = () => {
 
     if (confirm("Начать заново?")) {
+
         localStorage.removeItem(K);
+
         location.reload();
     }
 };
