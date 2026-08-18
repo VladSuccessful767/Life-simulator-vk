@@ -15,22 +15,24 @@
 <section class="goals"><div class="title">🎯 Цели</div><div id="goals"></div></section>
 <nav><button class="active">🏙️<small>Город</small></button><button id="hero">👤<small>Герой</small></button><button id="items">🎒<small>Имущество</small></button><button id="shop">🛒<small>Магазин</small></button><button id="rating">🏆<small>Рейтинг</small></button></nav>
 <div class="modal" id="modal"><div class="modalBox"><button class="close" id="close">×</button><div id="modalContent"></div></div></div>
-<footer>Версия 0.2 • Город</footer>
-</main>
+<footer>Версия 0.2 · Город</footer>
 
 <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
 
 <script>
-  vkBridge.send('VKWebAppInit')
-    .then(() => {
-      console.log('VK Bridge initialized');
-    })
-    .catch((error) => {
-      console.error('VK Bridge error:', error);
-    });
+  if (window.vkBridge) {
+    vkBridge.send('VKWebAppInit')
+      .then(() => {
+        console.log('VK Mini App initialized');
+      })
+      .catch((error) => {
+        console.error('VK Bridge error:', error);
+      });
+  }
 </script>
 
 <script src="game.js"></script>
 
+</main>
 </body>
 </html>
