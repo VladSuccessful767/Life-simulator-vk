@@ -1,1930 +1,298 @@
-const SAVE_KEY = "auto_service_v03";
-
 /* =========================================================
-   БАЗА АВТОМОБИЛЕЙ
+   АВТОСЕРВИС: С НУЛЯ
+   ВИЗУАЛЬНЫЙ ГАРАЖ + ДИАГНОСТИКА
 ========================================================= */
 
-const cars = [
-    { brand: "Kia", model: "Rio", years: [2013, 2014, 2015, 2016], icon: "🚗" },
-    { brand: "Kia", model: "Ceed", years: [2012, 2013, 2014, 2015], icon: "🚗" },
-    { brand: "Hyundai", model: "Solaris", years: [2013, 2014, 2015, 2016], icon: "🚙" },
-    { brand: "Hyundai", model: "Elantra", years: [2013, 2014, 2015], icon: "🚘" },
-    { brand: "Lada", model: "Vesta", years: [2016, 2017, 2018, 2019], icon: "🚗" },
-    { brand: "Lada", model: "Granta", years: [2014, 2015, 2016, 2017], icon: "🚗" },
-    { brand: "Renault", model: "Logan", years: [2013, 2014, 2015, 2016], icon: "🚙" },
-    { brand: "Volkswagen", model: "Polo", years: [2013, 2014, 2015, 2016], icon: "🚘" },
-    { brand: "Skoda", model: "Rapid", years: [2014, 2015, 2016, 2017], icon: "🚗" },
-    { brand: "Toyota", model: "Corolla", years: [2013, 2014, 2015, 2016], icon: "🚘" },
-    { brand: "Ford", model: "Focus", years: [2013, 2014, 2015, 2016], icon: "🚗" },
-    { brand: "Nissan", model: "Qashqai", years: [2013, 2014, 2015, 2016], icon: "🚙" }
-];
-
-
 /* =========================================================
-   БАЗА КЛИЕНТОВ
+   ВИЗУАЛЬНЫЙ ГАРАЖ — ПЕРВЫЙ ЭТАП
 ========================================================= */
 
-const clients = [
-    {
-        name: "Алексей",
-        type: "Обычный клиент",
-        patience: 0.65,
-        priceSensitivity: 0.55
-    },
-    {
-        name: "Максим",
-        type: "Экономный клиент",
-        patience: 0.55,
-        priceSensitivity: 0.85
-    },
-    {
-        name: "Дмитрий",
-        type: "Постоянный клиент",
-        patience: 0.85,
-        priceSensitivity: 0.45
-    },
-    {
-        name: "Иван",
-        type: "Требовательный клиент",
-        patience: 0.45,
-        priceSensitivity: 0.75
-    },
-    {
-        name: "Сергей",
-        type: "Автолюбитель",
-        patience: 0.80,
-        priceSensitivity: 0.35
-    },
-    {
-        name: "Андрей",
-        type: "Торгуется за каждую услугу",
-        patience: 0.60,
-        priceSensitivity: 0.95
-    },
-    {
-        name: "Евгений",
-        type: "Срочный клиент",
-        patience: 0.35,
-        priceSensitivity: 0.50
-    },
-    {
-        name: "Николай",
-        type: "Новый клиент",
-        patience: 0.70,
-        priceSensitivity: 0.60
-    }
-];
+let garageSceneMode = "overview";
 
+function garageSceneHtml() {
+    const order = state.currentOrder;
 
-/* =========================================================
-   БАЗА НЕИСПРАВНОСТЕЙ
-========================================================= */
+    const carName = order
+        ? `${order.car.brand} ${order.car.model}`
+        : "Автомобиль клиента";
 
-const problems = [
+    return `
+        <div class="garage-scene" id="garageScene">
 
-    {
-        id: "hard_start",
-        category: "engine",
-        title: "Трудный запуск двигателя",
-
-        complaints: [
-            "Машина плохо заводится утром.",
-            "После ночной стоянки приходится долго крутить стартер.",
-            "На холодную двигатель запускается не с первого раза."
-        ],
-
-        causes: [
-            {
-                id: "battery",
-                name: "🔋 Слабый аккумулятор",
-                probability: 0.25
-            },
-            {
-                id: "spark",
-                name: "🔥 Износ свечей зажигания",
-                probability: 0.35
-            },
-            {
-                id: "fuel",
-                name: "⛽ Недостаточное давление топлива",
-                probability: 0.20
-            },
-            {
-                id: "sensor",
-                name: "💻 Неисправность датчика температуры",
-                probability: 0.20
-            }
-        ],
-
-        checks: {
-            visual: {
-                name: "👀 Визуальный осмотр",
-                time: 5,
-                equipment: 0,
-                results: {
-                    battery:
-                        "Внешних повреждений аккумулятора не обнаружено.",
-                    spark:
-                        "Явных внешних повреждений нет.",
-                    fuel:
-                        "Следов утечки топлива нет.",
-                    sensor:
-                        "Визуально система выглядит исправной."
-                }
-            },
-
-            battery: {
-                name: "🔋 Проверить аккумулятор",
-                time: 5,
-                equipment: 1,
-                results: {
-                    battery:
-                        "Напряжение при запуске заметно проседает. Аккумулятор требует дальнейшей проверки.",
-                    spark:
-                        "Напряжение аккумулятора в норме.",
-                    fuel:
-                        "Аккумулятор работает в штатном режиме.",
-                    sensor:
-                        "Напряжение аккумулятора в норме."
-                }
-            },
-
-            spark: {
-                name: "🔥 Проверить свечи",
-                time: 10,
-                equipment: 1,
-                results: {
-                    battery:
-                        "Свечи имеют небольшой износ, но критических проблем не обнаружено.",
-                    spark:
-                        "Свечи имеют сильный износ. Электроды загрязнены.",
-                    fuel:
-                        "Свечи в удовлетворительном состоянии.",
-                    sensor:
-                        "Свечи имеют нормальное состояние."
-                }
-            },
-
-            fuel: {
-                name: "⛽ Проверить давление топлива",
-                time: 20,
-                equipment: 3,
-                results: {
-                    battery:
-                        "Давление топлива соответствует норме.",
-                    spark:
-                        "Давление топлива соответствует норме.",
-                    fuel:
-                        "Давление топлива ниже нормы.",
-                    sensor:
-                        "Давление топлива соответствует норме."
-                }
-            },
-
-            obd: {
-                name: "💻 Сканирование OBD",
-                time: 10,
-                equipment: 2,
-                results: {
-                    battery:
-                        "Критических кодов двигателя нет.",
-                    spark:
-                        "Критических кодов двигателя нет.",
-                    fuel:
-                        "Критических кодов двигателя нет.",
-                    sensor:
-                        "Обнаружен код, связанный с температурным датчиком."
-                }
-            }
-        },
-
-        repairs: {
-            battery: {
-                name: "Аккумулятор",
-                partCost: 5500,
-                workCost: 700,
-                time: 20
-            },
-            spark: {
-                name: "Комплект свечей зажигания",
-                partCost: 2500,
-                workCost: 1000,
-                time: 30
-            },
-            fuel: {
-                name: "Топливный насос",
-                partCost: 6500,
-                workCost: 2500,
-                time: 90
-            },
-            sensor: {
-                name: "Датчик температуры ОЖ",
-                partCost: 1800,
-                workCost: 900,
-                time: 40
-            }
-        }
-    },
-
-
-    {
-        id: "rough_idle",
-        category: "engine",
-        title: "Неровная работа двигателя",
-
-        complaints: [
-            "На холостом ходу двигатель работает неровно.",
-            "Обороты иногда плавают.",
-            "На светофоре двигатель начинает вибрировать."
-        ],
-
-        causes: [
-            {
-                id: "air",
-                name: "💨 Подсос воздуха",
-                probability: 0.30
-            },
-            {
-                id: "throttle",
-                name: "🔧 Загрязнение дроссельной заслонки",
-                probability: 0.30
-            },
-            {
-                id: "spark",
-                name: "🔥 Пропуски зажигания",
-                probability: 0.25
-            },
-            {
-                id: "injector",
-                name: "⛽ Загрязнение форсунки",
-                probability: 0.15
-            }
-        ],
-
-        checks: {
-            visual: {
-                name: "👀 Осмотр впуска",
-                time: 5,
-                equipment: 0,
-                results: {
-                    air:
-                        "Обнаружены подозрительные места на вакуумном шланге.",
-                    throttle:
-                        "Внешних повреждений не обнаружено.",
-                    spark:
-                        "Визуально всё выглядит нормально.",
-                    injector:
-                        "Следов внешних повреждений нет."
-                }
-            },
-
-            obd: {
-                name: "💻 OBD и Live Data",
-                time: 15,
-                equipment: 2,
-                results: {
-                    air:
-                        "Коррекции топлива значительно увеличены.",
-                    throttle:
-                        "Параметры дросселя требуют дополнительной проверки.",
-                    spark:
-                        "Обнаружены эпизодические пропуски воспламенения.",
-                    injector:
-                        "Параметры двигателя не дают однозначного ответа."
-                }
-            },
-
-            throttle: {
-                name: "🔧 Проверить дроссель",
-                time: 20,
-                equipment: 1,
-                results: {
-                    air:
-                        "Дроссель загрязнён умеренно.",
-                    throttle:
-                        "Дроссельная заслонка сильно загрязнена.",
-                    spark:
-                        "Дроссель загрязнён незначительно.",
-                    injector:
-                        "Дроссель работает нормально."
-                }
-            },
-
-            smoke: {
-                name: "💨 Дымогенератор",
-                time: 25,
-                equipment: 4,
-                results: {
-                    air:
-                        "Обнаружена утечка воздуха во впускной системе.",
-                    throttle:
-                        "Утечек воздуха не обнаружено.",
-                    spark:
-                        "Утечек воздуха не обнаружено.",
-                    injector:
-                        "Утечек воздуха не обнаружено."
-                }
-            }
-        },
-
-        repairs: {
-            air: {
-                name: "Устранение подсоса воздуха",
-                partCost: 700,
-                workCost: 1800,
-                time: 50
-            },
-            throttle: {
-                name: "Очистка дроссельной заслонки",
-                partCost: 300,
-                workCost: 1500,
-                time: 60
-            },
-            spark: {
-                name: "Ремонт системы зажигания",
-                partCost: 2800,
-                workCost: 1700,
-                time: 60
-            },
-            injector: {
-                name: "Чистка форсунки",
-                partCost: 1200,
-                workCost: 2200,
-                time: 80
-            }
-        }
-    },
-
-
-    {
-        id: "suspension_noise",
-        category: "suspension",
-        title: "Стук в передней подвеске",
-
-        complaints: [
-            "Спереди появился стук на кочках.",
-            "На неровной дороге слышен глухой стук.",
-            "При проезде лежачих полицейских что-то стучит."
-        ],
-
-        causes: [
-            {
-                id: "stabilizer",
-                name: "🛞 Стойка стабилизатора",
-                probability: 0.35
-            },
-            {
-                id: "bushing",
-                name: "🔩 Втулки стабилизатора",
-                probability: 0.25
-            },
-            {
-                id: "ball",
-                name: "⚙️ Шаровая опора",
-                probability: 0.20
-            },
-            {
-                id: "shock",
-                name: "🛞 Амортизатор",
-                probability: 0.20
-            }
-        ],
-
-        checks: {
-            visual: {
-                name: "👀 Визуальный осмотр",
-                time: 10,
-                equipment: 0,
-                results: {
-                    stabilizer:
-                        "Визуально обнаружены следы износа стойки стабилизатора.",
-                    bushing:
-                        "Втулки имеют заметные следы старения.",
-                    ball:
-                        "Визуальных признаков критического износа нет.",
-                    shock:
-                        "Следов явной течи амортизатора нет."
-                }
-            },
-
-            lift: {
-                name: "🔧 Проверка на подъёмнике",
-                time: 15,
-                equipment: 1,
-                results: {
-                    stabilizer:
-                        "Стойка стабилизатора имеет люфт.",
-                    bushing:
-                        "Втулки имеют люфт и деформацию.",
-                    ball:
-                        "Шаровая опора имеет небольшой люфт.",
-                    shock:
-                        "Крепления исправны."
-                }
-            },
-
-            shock: {
-                name: "🛞 Проверить амортизатор",
-                time: 15,
-                equipment: 1,
-                results: {
-                    stabilizer:
-                        "Амортизатор работает удовлетворительно.",
-                    bushing:
-                        "Амортизатор работает нормально.",
-                    ball:
-                        "Амортизатор исправен.",
-                    shock:
-                        "Эффективность амортизатора снижена."
-                }
-            }
-        },
-
-        repairs: {
-            stabilizer: {
-                name: "Стойка стабилизатора",
-                partCost: 1800,
-                workCost: 1400,
-                time: 45
-            },
-            bushing: {
-                name: "Комплект втулок стабилизатора",
-                partCost: 900,
-                workCost: 1300,
-                time: 40
-            },
-            ball: {
-                name: "Шаровая опора",
-                partCost: 2500,
-                workCost: 1800,
-                time: 60
-            },
-            shock: {
-                name: "Амортизатор",
-                partCost: 4500,
-                workCost: 2200,
-                time: 70
-            }
-        }
-    },
-
-
-    {
-        id: "check_engine",
-        category: "obd",
-        title: "Загорелся Check Engine",
-
-        complaints: [
-            "Загорелся Check Engine.",
-            "На панели появился жёлтый значок двигателя.",
-            "Машина едет нормально, но горит ошибка двигателя."
-        ],
-
-        causes: [
-            {
-                id: "misfire",
-                name: "🔥 Пропуски зажигания",
-                probability: 0.30
-            },
-            {
-                id: "lambda",
-                name: "💻 Лямбда-зонд",
-                probability: 0.25
-            },
-            {
-                id: "maf",
-                name: "💨 Датчик расхода воздуха",
-                probability: 0.20
-            },
-            {
-                id: "evap",
-                name: "⛽ Система EVAP",
-                probability: 0.25
-            }
-        ],
-
-        checks: {
-            obd: {
-                name: "💻 Сканирование OBD-II",
-                time: 10,
-                equipment: 2,
-                results: {
-                    misfire:
-                        "Обнаружен код P0301 — пропуски воспламенения цилиндра №1.",
-                    lambda:
-                        "Обнаружен код, связанный с работой кислородного датчика.",
-                    maf:
-                        "Параметры расходомера воздуха выходят за ожидаемый диапазон.",
-                    evap:
-                        "Обнаружен код, связанный с системой EVAP."
-                }
-            },
-
-            live: {
-                name: "📊 Проверить Live Data",
-                time: 15,
-                equipment: 2,
-                results: {
-                    misfire:
-                        "Параметры указывают на нестабильность работы одного цилиндра.",
-                    lambda:
-                        "Сигнал кислородного датчика работает нестабильно.",
-                    maf:
-                        "Показания расхода воздуха отличаются от ожидаемых.",
-                    evap:
-                        "Параметры двигателя в целом стабильны."
-                }
-            },
-
-            visual: {
-                name: "👀 Осмотр двигателя",
-                time: 10,
-                equipment: 0,
-                results: {
-                    misfire:
-                        "Визуально явных повреждений нет.",
-                    lambda:
-                        "Проводка датчика выглядит нормально.",
-                    maf:
-                        "Разъём расходомера установлен.",
-                    evap:
-                        "Явных повреждений шлангов не обнаружено."
-                }
-            }
-        },
-
-        repairs: {
-            misfire: {
-                name: "Ремонт системы зажигания",
-                partCost: 3200,
-                workCost: 1800,
-                time: 60
-            },
-            lambda: {
-                name: "Кислородный датчик",
-                partCost: 4200,
-                workCost: 1500,
-                time: 50
-            },
-            maf: {
-                name: "Датчик расхода воздуха",
-                partCost: 5000,
-                workCost: 1600,
-                time: 45
-            },
-            evap: {
-                name: "Ремонт системы EVAP",
-                partCost: 1500,
-                workCost: 1800,
-                time: 60
-            }
-        }
-    },
-
-
-    {
-        id: "overheat",
-        category: "cooling",
-        title: "Перегрев двигателя",
-
-        complaints: [
-            "Температура двигателя стала выше обычного.",
-            "В пробке машина начинает перегреваться.",
-            "Из-под капота идёт горячий воздух."
-        ],
-
-        causes: [
-            {
-                id: "coolant",
-                name: "💧 Низкий уровень охлаждающей жидкости",
-                probability: 0.30
-            },
-            {
-                id: "thermostat",
-                name: "🌡️ Неисправен термостат",
-                probability: 0.25
-            },
-            {
-                id: "fan",
-                name: "🌀 Не работает вентилятор",
-                probability: 0.25
-            },
-            {
-                id: "radiator",
-                name: "❄️ Забит радиатор",
-                probability: 0.20
-            }
-        ],
-
-        checks: {
-            coolant: {
-                name: "💧 Проверить уровень ОЖ",
-                time: 5,
-                equipment: 0,
-                results: {
-                    coolant:
-                        "Уровень охлаждающей жидкости значительно ниже нормы.",
-                    thermostat:
-                        "Уровень ОЖ в норме.",
-                    fan:
-                        "Уровень ОЖ в норме.",
-                    radiator:
-                        "Уровень ОЖ немного ниже нормы."
-                }
-            },
-
-            temperature: {
-                name: "🌡️ Проверить температуру",
-                time: 10,
-                equipment: 1,
-                results: {
-                    coolant:
-                        "Температура двигателя повышена.",
-                    thermostat:
-                        "Двигатель перегревается из-за неправильной циркуляции.",
-                    fan:
-                        "Температура резко растёт при остановке.",
-                    radiator:
-                        "Температура повышена при нагрузке."
-                }
-            },
-
-            fan: {
-                name: "🌀 Проверить вентилятор",
-                time: 10,
-                equipment: 1,
-                results: {
-                    coolant:
-                        "Вентилятор включается штатно.",
-                    thermostat:
-                        "Вентилятор работает.",
-                    fan:
-                        "Вентилятор не включается при достижении температуры.",
-                    radiator:
-                        "Вентилятор работает."
-                }
-            },
-
-            radiator: {
-                name: "❄️ Проверить радиатор",
-                time: 15,
-                equipment: 1,
-                results: {
-                    coolant:
-                        "Радиатор в удовлетворительном состоянии.",
-                    thermostat:
-                        "Радиатор прогревается неравномерно.",
-                    fan:
-                        "Радиатор исправен.",
-                    radiator:
-                        "Проходимость радиатора снижена."
-                }
-            }
-        },
-
-        repairs: {
-            coolant: {
-                name: "Устранение утечки и замена ОЖ",
-                partCost: 1800,
-                workCost: 1700,
-                time: 60
-            },
-            thermostat: {
-                name: "Термостат",
-                partCost: 2600,
-                workCost: 1800,
-                time: 70
-            },
-            fan: {
-                name: "Вентилятор охлаждения",
-                partCost: 4800,
-                workCost: 1800,
-                time: 60
-            },
-            radiator: {
-                name: "Радиатор охлаждения",
-                partCost: 6500,
-                workCost: 2500,
-                time: 100
-            }
-        }
-    },
-
-
-    {
-        id: "braking_noise",
-        category: "brakes",
-        title: "Шум при торможении",
-
-        complaints: [
-            "При торможении появился скрип.",
-            "Тормоза начали издавать неприятный звук.",
-            "При торможении слышен металлический шум."
-        ],
-
-        causes: [
-            {
-                id: "pads",
-                name: "🛑 Износ тормозных колодок",
-                probability: 0.45
-            },
-            {
-                id: "disc",
-                name: "⚙️ Износ тормозного диска",
-                probability: 0.25
-            },
-            {
-                id: "caliper",
-                name: "🔧 Закисший суппорт",
-                probability: 0.15
-            },
-            {
-                id: "debris",
-                name: "🪨 Посторонний предмет",
-                probability: 0.15
-            }
-        ],
-
-        checks: {
-            visual: {
-                name: "👀 Осмотр тормозов",
-                time: 10,
-                equipment: 0,
-                results: {
-                    pads:
-                        "Толщина колодок близка к минимально допустимой.",
-                    disc:
-                        "На диске заметна выраженная выработка.",
-                    caliper:
-                        "Суппорт имеет признаки загрязнения.",
-                    debris:
-                        "Обнаружены следы постороннего предмета."
-                }
-            },
-
-            brake: {
-                name: "🛑 Проверить тормозной механизм",
-                time: 15,
-                equipment: 1,
-                results: {
-                    pads:
-                        "Колодки изношены неравномерно.",
-                    disc:
-                        "Рабочая поверхность диска имеет глубокую выработку.",
-                    caliper:
-                        "Суппорт работает с повышенным сопротивлением.",
-                    debris:
-                        "Механизм исправен."
-                }
-            }
-        },
-
-        repairs: {
-            pads: {
-                name: "Комплект тормозных колодок",
-                partCost: 2800,
-                workCost: 1400,
-                time: 45
-            },
-            disc: {
-                name: "Тормозные диски",
-                partCost: 5200,
-                workCost: 1800,
-                time: 70
-            },
-            caliper: {
-                name: "Обслуживание суппорта",
-                partCost: 1000,
-                workCost: 2200,
-                time: 70
-            },
-            debris: {
-                name: "Удаление постороннего предмета",
-                partCost: 0,
-                workCost: 800,
-                time: 20
-            }
-        }
-    }
-];
-
-
-/* =========================================================
-   БАЗА ЗНАНИЙ
-========================================================= */
-
-const knowledgeBase = {
-
-    engine: [
-        ["🔥 Четырёхтактный двигатель",
-            "Большинство бензиновых двигателей работают по циклу: впуск, сжатие, рабочий ход и выпуск."],
-
-        ["🔥 Система зажигания",
-            "Для воспламенения смеси необходимы свечи и система, создающая высокое напряжение."],
-
-        ["🔥 Пропуски воспламенения",
-            "Пропуски могут быть вызваны свечами, катушками, форсунками, подсосом воздуха, компрессией и другими причинами."],
-
-        ["🔥 Компрессия",
-            "Низкая компрессия может указывать на проблемы с клапанами, поршневой группой или прокладкой ГБЦ."],
-
-        ["🛢️ Моторное масло",
-            "Масло смазывает детали двигателя, отводит часть тепла и помогает защищать поверхности от износа."],
-
-        ["⛓️ ГРМ",
-            "Газораспределительный механизм синхронизирует движение поршней и клапанов."],
-
-        ["🌡️ Перегрев",
-            "Причиной перегрева могут быть низкий уровень ОЖ, термостат, вентилятор, радиатор, насос и другие элементы."]
-    ],
-
-    electrical: [
-        ["🔋 Аккумулятор",
-            "Аккумулятор обеспечивает питание электрооборудования и большой ток, необходимый стартеру."],
-
-        ["⚡ Генератор",
-            "Генератор заряжает аккумулятор во время работы двигателя и обеспечивает электрооборудование."],
-
-        ["⚡ Стартер",
-            "Стартер проворачивает коленчатый вал при запуске двигателя."],
-
-        ["🔌 Масса",
-            "Плохое соединение с массой может вызывать множество странных электрических неисправностей."],
-
-        ["🧪 Мультиметр",
-            "Мультиметром можно измерять напряжение, сопротивление и ток в зависимости от режима и схемы подключения."],
-
-        ["🧯 Предохранители",
-            "Предохранитель защищает электрическую цепь от чрезмерного тока."]
-    ],
-
-    obd: [
-        ["💻 OBD-II",
-            "OBD-II позволяет считывать диагностические коды и параметры электронных систем."],
-
-        ["📟 Коды P0xxx",
-            "Код неисправности помогает сузить область поиска, но не всегда означает неисправность конкретной детали."],
-
-        ["📊 Live Data",
-            "Поток текущих параметров двигателя помогает сравнивать фактическую работу систем с ожидаемой."],
-
-        ["🧊 Freeze Frame",
-            "Freeze Frame может сохранить параметры автомобиля в момент возникновения ошибки."],
-
-        ["📟 P0301",
-            "P0301 указывает на обнаруженные пропуски воспламенения в цилиндре №1. Причину необходимо подтверждать дополнительными проверками."],
-
-        ["📟 Коррекции топлива",
-            "Коррекции помогают оценивать, как система управления двигателем компенсирует отклонения состава смеси."]
-    ],
-
-    fuel: [
-        ["⛽ Топливная система",
-            "Система должна обеспечивать необходимое количество топлива при требуемом давлении."],
-
-        ["⛽ Топливный насос",
-            "Насос создаёт давление и обеспечивает подачу топлива к двигателю."],
-
-        ["💉 Форсунки",
-            "Форсунки дозируют топливо и распыляют его в соответствии с командами системы управления."],
-
-        ["⛽ Давление топлива",
-            "Пониженное давление может привести к плохому запуску, провалам и потере мощности."]
-    ],
-
-    suspension: [
-        ["🛞 Амортизатор",
-            "Амортизатор контролирует колебания подвески и помогает колесу сохранять контакт с дорогой."],
-
-        ["🔩 Сайлентблок",
-            "Сайлентблоки соединяют элементы подвески и гасят вибрации."],
-
-        ["🛞 Стойка стабилизатора",
-            "Связь стабилизатора с подвеской. Износ часто проявляется стуком на неровностях."],
-
-        ["⚙️ Шаровая опора",
-            "Шаровая позволяет элементам подвески двигаться относительно друг друга. Критический люфт опасен."]
-    ],
-
-    brakes: [
-        ["🛑 Тормозные колодки",
-            "Колодки создают трение о тормозной диск или барабан."],
-
-        ["⚙️ Тормозной диск",
-            "Диск работает вместе с колодками. Выработка и перегрев могут ухудшать работу тормозов."],
-
-        ["🔧 Суппорт",
-            "Суппорт прижимает колодки к диску. Его закисание может привести к неравномерному износу и перегреву."],
-
-        ["🛑 ABS",
-            "ABS предотвращает длительную блокировку колёс при торможении."]
-    ],
-
-    transmission: [
-        ["⚙️ АКПП",
-            "Автоматическая коробка передач использует гидравлическую и электронную системы управления."],
-
-        ["⚙️ МКПП",
-            "В механической коробке водитель самостоятельно выбирает передаточное отношение."],
-
-        ["🔧 Сцепление",
-            "Сцепление позволяет плавно соединять и разъединять двигатель и трансмиссию."]
-    ],
-
-    cooling: [
-        ["💧 Охлаждающая жидкость",
-            "ОЖ переносит тепло от двигателя к радиатору."],
-
-        ["🌡️ Термостат",
-            "Термостат регулирует циркуляцию охлаждающей жидкости и помогает двигателю выйти на рабочую температуру."],
-
-        ["🌀 Вентилятор",
-            "Вентилятор помогает охлаждать радиатор, особенно при небольшой скорости движения или остановке."]
-    ],
-
-    climate: [
-        ["❄️ Кондиционер",
-            "Система кондиционирования переносит тепло из салона наружу с помощью хладагента и компрессора."],
-
-        ["❄️ Компрессор кондиционера",
-            "Компрессор обеспечивает циркуляцию хладагента по системе."]
-    ]
-};
-
-
-/* =========================================================
-   СОСТОЯНИЕ ИГРЫ
-========================================================= */
-
-const defaultState = {
-    money: 15000,
-    reputation: 0,
-    level: 1,
-    xp: 0,
-
-    day: 1,
-    time: 480,
-
-    equipment: 100,
-
-    garage: {
-        level: 1,
-        posts: 1
-    },
-
-    currentOrder: null,
-
-    history: [],
-
-    lastProblemId: null
-};
-
-
-let state =
-    JSON.parse(
-        localStorage.getItem(SAVE_KEY) || "null"
-    ) || structuredClone(defaultState);
-
-
-/* =========================================================
-   ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-========================================================= */
-
-const $ = id =>
-    document.getElementById(id);
-
-
-function save() {
-
-    localStorage.setItem(
-        SAVE_KEY,
-        JSON.stringify(state)
-    );
-}
-
-
-function money(value) {
-
-    return new Intl.NumberFormat(
-        "ru-RU"
-    ).format(Math.round(value)) + " ₽";
-}
-
-
-function random(arr) {
-
-    return arr[
-        Math.floor(
-            Math.random() * arr.length
-        )
-    ];
-}
-
-
-function randomInt(min, max) {
-
-    return Math.floor(
-        Math.random() * (max - min + 1)
-    ) + min;
-}
-
-
-function timeText(minutes) {
-
-    const h =
-        Math.floor(minutes / 60);
-
-    const m =
-        minutes % 60;
-
-    return (
-        String(h).padStart(2, "0")
-        + ":" +
-        String(m).padStart(2, "0")
-    );
-}
-
-
-function addTime(minutes) {
-
-    state.time += minutes;
-
-    if (
-        state.time >= 600
-    ) {
-
-        state.time = 600;
-
-        showToast(
-            "⏰ Рабочий день закончился"
-        );
-    }
-}
-
-
-function useEquipment(amount) {
-
-    state.equipment =
-        Math.max(
-            0,
-            state.equipment - amount
-        );
-}
-
-
-function addXP(amount) {
-
-    state.xp += amount;
-
-    let need =
-        100 +
-        (state.level - 1) * 50;
-
-    while (
-        state.xp >= need
-    ) {
-
-        state.xp -= need;
-
-        state.level++;
-
-        state.reputation += 3;
-
-        showToast(
-            `🎉 Новый уровень: ${state.level}`
-        );
-
-        need =
-            100 +
-            (state.level - 1) * 50;
-    }
-}
-
-
-function addReputation(amount) {
-
-    state.reputation += amount;
-
-    state.reputation =
-        Math.max(
-            -100000,
-            Math.min(
-                100000,
-                state.reputation
-            )
-        );
+            <!-- Свет -->
+            <div class="garage-ceiling-light pulse"></div>
+
+            <!-- Вывеска -->
+            <div class="garage-sign">
+                🔧 АВТОСЕРВИС
+            </div>
+
+            <!-- Полка -->
+            <div class="garage-shelf">
+                <span>🧰</span>
+                <span>🔩</span>
+                <span>🛢️</span>
+                <span>🔧</span>
+            </div>
+
+            <!-- Подъёмник -->
+            <div class="garage-lift lift-left"></div>
+            <div class="garage-lift lift-right"></div>
+
+            <!-- АВТОМОБИЛЬ -->
+            <div
+                class="garage-car visual-car interactive"
+                id="visualCar"
+                onclick="inspectCar()"
+                title="Нажми для осмотра"
+            >
+
+                <div class="car-shadow"></div>
+
+                <div class="car-body">
+
+                    <div class="car-roof"></div>
+
+                    <div class="car-window front-window"></div>
+
+                    <div class="car-window rear-window"></div>
+
+                    <div class="car-hood"></div>
+
+                    <div class="car-headlight left-headlight"></div>
+
+                    <div class="car-headlight right-headlight"></div>
+
+                    <div class="car-grille"></div>
+
+                    <div class="car-wheel left-wheel"></div>
+
+                    <div class="car-wheel right-wheel"></div>
+
+                </div>
+
+                <div class="car-nameplate">
+                    ${carName}
+                </div>
+
+            </div>
+
+            <!-- Инструменты -->
+            <button
+                class="garage-hotspot hotspot-tools"
+                onclick="openGarageTools()"
+            >
+                🧰
+                <span>Инструменты</span>
+            </button>
+
+            <!-- OBD -->
+            <button
+                class="garage-hotspot hotspot-obd"
+                onclick="openGarageOBD()"
+            >
+                💻
+                <span>OBD</span>
+            </button>
+
+            <!-- Склад -->
+            <button
+                class="garage-hotspot hotspot-parts"
+                onclick="openGarageParts()"
+            >
+                📦
+                <span>Склад</span>
+            </button>
+
+            <!-- База знаний -->
+            <button
+                class="garage-hotspot hotspot-knowledge"
+                onclick="openKnowledgeMenu()"
+            >
+                📚
+                <span>База знаний</span>
+            </button>
+
+            <!-- Подсказка -->
+            <div class="garage-hint">
+                👆 Нажми на автомобиль, чтобы начать осмотр
+            </div>
+
+        </div>
+    `;
 }
 
 
 /* =========================================================
-   ГЕНЕРАТОР ЗАКАЗА
+   ОТОБРАЖЕНИЕ ГАРАЖА
 ========================================================= */
 
-function generateOrder() {
+function renderGarageScene() {
 
-    let problem;
+    const container = document.querySelector(".garage-image");
 
-    let attempts = 0;
-
-    do {
-
-        problem =
-            random(problems);
-
-        attempts++;
-
-    } while (
-        problem.id === state.lastProblemId
-        && attempts < 10
-    );
-
-
-    const car =
-        random(cars);
-
-    const client =
-        random(clients);
-
-    const year =
-        random(car.years);
-
-    const mileage =
-        randomInt(70000, 260000);
-
-    const complaint =
-        random(problem.complaints);
-
-    const correctCause =
-        randomWeighted(problem.causes);
-
-
-    const scenario = {
-
-        id:
-            Date.now()
-            + Math.random(),
-
-        car: {
-
-            brand:
-                car.brand,
-
-            model:
-                car.model,
-
-            year:
-                year,
-
-            mileage:
-                mileage,
-
-            icon:
-                car.icon
-        },
-
-        client: client,
-
-        problem: problem,
-
-        complaint: complaint,
-
-        correctCause:
-            correctCause.id,
-
-        diagnosisPrice:
-            randomInt(600, 1200),
-
-        checks: {},
-
-        history: [],
-
-        diagnosisComplete: false,
-
-        selectedCause: null,
-
-        repair: null,
-
-        agreed: false,
-
-        completed: false,
-
-        knowledgeUsed: false,
-
-        diagnosisPaid: false
-    };
-
-
-    Object.keys(
-        problem.checks
-    ).forEach(key => {
-
-        scenario.checks[key] =
-            problem.checks[key];
-    });
-
-
-    state.lastProblemId =
-        problem.id;
-
-    state.currentOrder =
-        scenario;
-
-
-    save();
-
-    return scenario;
-}
-
-
-function randomWeighted(items) {
-
-    const total =
-        items.reduce(
-            (sum, item) =>
-                sum + item.probability,
-            0
-        );
-
-    let value =
-        Math.random() * total;
-
-    for (
-        const item of items
-    ) {
-
-        value -= item.probability;
-
-        if (
-            value <= 0
-        ) {
-
-            return item;
-        }
+    if (!container) {
+        return;
     }
 
-    return items[0];
+    container.classList.add("garage-visual-container");
+
+    container.innerHTML = garageSceneHtml();
 }
 
 
 /* =========================================================
-   МОДАЛЬНОЕ ОКНО
+   ОСНОВНОЙ RENDER
 ========================================================= */
 
-function openModal(html) {
+/*
+   Старый render переименован в renderBase().
+   Он продолжает отвечать за существующую игру.
 
-    $("modalContent").innerHTML =
-        html;
-
-    $("modal").classList.add("show");
-}
-
-
-function closeModal() {
-
-    $("modal").classList.remove("show");
-}
-
-
-/* =========================================================
-   УВЕДОМЛЕНИЯ
-========================================================= */
-
-function showToast(text) {
-
-    const toast =
-        $("toast");
-
-    toast.textContent =
-        text;
-
-    toast.classList.add("show");
-
-    clearTimeout(
-        window.toastTimer
-    );
-
-    window.toastTimer =
-        setTimeout(
-            () => {
-                toast.classList.remove("show");
-            },
-            2500
-        );
-}
-
-
-/* =========================================================
-   RENDER
-========================================================= */
+   Новый render() сначала запускает старый интерфейс,
+   затем поверх него устанавливает визуальный гараж.
+*/
 
 function render() {
 
-    $("money").textContent =
-        money(state.money);
+    renderBase();
 
-    $("reputation").textContent =
-        state.reputation;
-
-    $("level").textContent =
-        state.level;
-
-
-    const need =
-        100 +
-        (state.level - 1) * 50;
-
-    $("xp").textContent =
-        `${state.xp} / ${need}`;
-
-
-    const order =
-        state.currentOrder;
-
-
-    if (order) {
-
-        $("carName").textContent =
-            `${order.car.brand} ${order.car.model}`;
-
-        $("carProblem").textContent =
-            `«${order.complaint}»`;
-
-    } else {
-
-        $("carName").textContent =
-            "Нет автомобиля";
-
-        $("carProblem").textContent =
-            "Ожидание нового клиента";
-    }
-
-
-    const garageLevel =
-        document.querySelector(
-            ".garage-level"
-        );
-
-    if (garageLevel) {
-
-        garageLevel.textContent =
-            `Уровень ${state.garage.level}`;
-    }
-
-
-    const garageStats =
-        document.querySelectorAll(
-            ".garage-stats b"
-        );
-
-    if (
-        garageStats.length >= 3
-    ) {
-
-        garageStats[0].textContent =
-            state.garage.posts;
-
-        garageStats[1].textContent =
-            `Ресурс ${state.equipment}%`;
-
-        garageStats[2].textContent =
-            "1";
-    }
+    renderGarageScene();
 }
 
 
 /* =========================================================
-   НАЧАЛО ДИАГНОСТИКИ
+   ОСМОТР АВТОМОБИЛЯ
 ========================================================= */
 
-function startDiagnosis() {
+function inspectCar() {
 
-    if (
-        !state.currentOrder
-    ) {
+    const order = state.currentOrder;
 
-        generateOrder();
+    if (!order) {
 
-        render();
+        showToast(
+            "🚗 Сейчас в гараже нет автомобиля клиента"
+        );
+
+        return;
     }
 
+    garageSceneMode = "inspection";
 
-    openDiagnosis();
-}
+    openModal(`
 
+        <h2>🔍 Осмотр автомобиля</h2>
 
-function openDiagnosis() {
+        <div class="car-inspection-card">
 
-    const order =
-        state.currentOrder;
+            <div class="inspection-car-icon">
+                🚗
+            </div>
 
-    const problem =
-        order.problem;
+            <div>
 
+                <h3>
+                    ${order.car.brand}
+                    ${order.car.model}
+                </h3>
 
-    let html = `
+                <p>
+                    ${order.car.year} год ·
+                    ${order.car.mileage.toLocaleString("ru-RU")} км
+                </p>
 
-        <h2>🔍 Диагностика</h2>
+            </div>
+
+        </div>
 
         <p>
-            <b>
-                ${order.car.icon}
-                ${order.car.brand}
-                ${order.car.model}
-            </b>
+            Осмотри автомобиль перед началом диагностики.
+            Некоторые неисправности можно обнаружить
+            без специального оборудования.
         </p>
 
-        <p>
-            ${order.car.year} год,
-            пробег
-            ${order.car.mileage.toLocaleString("ru-RU")}
-            км
-        </p>
-
-        <div class="diagnosis-result">
-
-            👤 <b>Клиент:</b>
-            ${order.client.name}<br>
-
-            💬 <b>Тип:</b>
-            ${order.client.type}<br><br>
-
-            «${order.complaint}»
-
-        </div>
-
-        <div class="stat-row">
-            <span>⏰ Время</span>
-            <b>${timeText(state.time)}</b>
-        </div>
-
-        <div class="stat-row">
-            <span>🧰 Оборудование</span>
-            <b>${state.equipment}%</b>
-        </div>
-
-        <div class="stat-row">
-            <span>💰 Диагностика</span>
-            <b>${money(order.diagnosisPrice)}</b>
-        </div>
-
-        <h3>🔎 Проверки</h3>
-
-        <div class="diagnosis-list">
-    `;
-
-
-    Object.keys(
-        order.checks
-    ).forEach(key => {
-
-        const check =
-            order.checks[key];
-
-        const used =
-            order.history.some(
-                item =>
-                    item.key === key
-            );
-
-
-        html += `
+        <div class="inspection-grid">
 
             <button
-                class="diagnosis-button"
-                ${used ? "disabled" : ""}
-                onclick="performCheck('${key}')">
-
-                ${check.name}
-
-                <br>
-
+                class="inspection-button"
+                onclick="inspectArea('engine')"
+            >
+                <span>⚙️</span>
+                <b>Двигатель</b>
                 <small>
-                    ⏱️ ${check.time} мин
-                    · 🧰 −${check.equipment}
+                    Подкапотное пространство
                 </small>
-
             </button>
 
-        `;
-    });
-
-
-    html += `
-        </div>
-
-        ${renderHistory(order)}
-
-        <button
-            class="action-button"
-            onclick="openAnalysis()">
-
-            🧠 Перейти к анализу
-
-        </button>
-    `;
-
-
-    openModal(html);
-}
-
-
-/* =========================================================
-   ПРОВЕРКА
-========================================================= */
-
-function performCheck(key) {
-
-    const order =
-        state.currentOrder;
-
-    const check =
-        order.checks[key];
-
-
-    if (!check) {
-
-        return;
-    }
-
-
-    if (
-        order.history.some(
-            item =>
-                item.key === key
-        )
-    ) {
-
-        showToast(
-            "Эта проверка уже выполнена"
-        );
-
-        return;
-    }
-
-
-    if (
-        state.equipment <
-        check.equipment
-    ) {
-
-        showToast(
-            "🧰 Недостаточно ресурса оборудования"
-        );
-
-        return;
-    }
-
-
-    addTime(
-        check.time
-    );
-
-    useEquipment(
-        check.equipment
-    );
-
-
-    const result =
-        check.results[
-            order.correctCause
-        ];
-
-
-    order.history.push({
-
-        key:
-            key,
-
-        name:
-            check.name,
-
-        result:
-            result,
-
-        time:
-            check.time,
-
-        equipment:
-            check.equipment
-    });
-
-
-    save();
-
-    openDiagnosis();
-}
-
-
-/* =========================================================
-   ИСТОРИЯ
-========================================================= */
-
-function renderHistory(order) {
-
-    if (
-        order.history.length === 0
-    ) {
-
-        return `
-
-            <div class="diagnosis-result">
-
-                📋 Пока ни одной проверки
-                не проведено.
-
-            </div>
-
-        `;
-    }
-
-
-    let html = `
-
-        <div class="diagnosis-result">
-
-            <b>📋 История диагностики</b>
-
-    `;
-
-
-    order.history.forEach(
-        (item, index) => {
-
-            html += `
-
-                <div style="
-                    margin-top:12px;
-                    padding-top:12px;
-                    border-top:1px solid #333;
-                ">
-
-                    <b>
-                        ${index + 1}.
-                        ${item.name}
-                    </b>
-
-                    <br>
-
-                    <small>
-                        ⏱️ −${item.time} мин
-                        · 🧰 −${item.equipment}
-                    </small>
-
-                    <p>
-                        ${item.result}
-                    </p>
-
-                </div>
-
-            `;
-        }
-    );
-
-
-    html += `
-        </div>
-    `;
-
-    return html;
-}
-
-
-/* =========================================================
-   АНАЛИЗ
-========================================================= */
-
-function openAnalysis() {
-
-    const order =
-        state.currentOrder;
-
-
-    if (
-        order.history.length === 0
-    ) {
-
-        showToast(
-            "Сначала проведи диагностику"
-        );
-
-        return;
-    }
-
-
-    let html = `
-
-        <h2>🧠 Анализ неисправности</h2>
-
-        <p>
-            Изучи результаты и выбери
-            наиболее вероятную причину.
-        </p>
-
-        ${renderHistory(order)}
-
-        <h3>Возможные причины:</h3>
-
-        <div class="diagnosis-list">
-    `;
-
-
-    order.problem.causes
-        .forEach(cause => {
-
-            html += `
-
-                <button
-                    class="diagnosis-button"
-                    onclick="chooseDiagnosis('${cause.id}')">
-
-                    ${cause.name}
-
-                </button>
-
-            `;
-        });
-
-
-    html += `
-
-        </div>
-
-        <button
-            class="action-button"
-            onclick="openKnowledgeMenu()">
-
-            📚 Открыть базу знаний
-
-        </button>
-
-    `;
-
-
-    openModal(html);
-}
-
-
-/* =========================================================
-   ДИАГНОЗ
-========================================================= */
-
-function chooseDiagnosis(causeId) {
-
-    const order =
-        state.currentOrder;
-
-
-    if (
-        causeId !==
-        order.correctCause
-    ) {
-
-        addReputation(-2);
-
-        addXP(5);
-
-        save();
-
-
-        openModal(`
-
-            <h2>❌ Диагноз не подтверждён</h2>
-
-            <p>
-                Выбранная причина не соответствует
-                результатам текущей диагностики.
-            </p>
-
-            <div class="diagnosis-result">
-
-                ⭐ Репутация −2<br>
-                📈 Опыт +5
-
-            </div>
-
-            <p>
-                Можно продолжить диагностику
-                и собрать дополнительные данные.
-            </p>
 
             <button
-                class="action-button"
-                onclick="openDiagnosis()">
-
-                🔍 Продолжить диагностику
-
+                class="inspection-button"
+                onclick="inspectArea('battery')"
+            >
+                <span>🔋</span>
+                <b>Аккумулятор</b>
+                <small>
+                    Электрика и запуск
+                </small>
             </button>
 
-        `);
 
-        return;
-    }
-
-
-    order.selectedCause =
-        causeId;
-
-    order.diagnosisComplete =
-        true;
-
-
-    addXP(20);
-
-    save();
-
-    openRepairAgreement();
-}
+            <button
+                class="inspection-button"
+                onclick="inspectArea('brakes')"
+            >
+                <span>🛑</span>
+                <b>Тормоза</b>
+                <small>
+                    Диски и колодки
+                </small>
+            </button>
 
 
-/* =========================================================
-   СОГЛАСОВАНИЕ РЕМОНТА
-========================================================= */
-
-function openRepairAgreement() {
-
-    const order =
-        state.currentOrder;
-
-    const repair =
-        order.problem.repairs[
-            order.selectedCause
-        ];
+            <button
+                class="inspection-button"
+                onclick="inspectArea('suspension')"
+            >
+                <span>🛞</span>
+                <b>Подвеска</b>
+                <small>
+                    Люфты и состояние
+                </small>
+            </button>
 
 
-    const cost =
-        repair.partCost +
-        repair.workCost;
+            <button
+                class="inspection-button"
+                onclick="inspectArea('body')"
+            >
+                <span>🚘</span>
+                <b>Кузов</b>
+                <small>
+                    Внешний осмотр
+                </small>
+            </button>
 
 
-    openModal(`
+            <button
+                class="inspection-button"
+                onclick="inspectArea('interior')"
+            >
+                <span>🪑</span>
+                <b>Салон</b>
+                <small>
+                    Органы управления
+                </small>
+            </button>
 
-        <h2>📋 Согласование ремонта</h2>
-
-        <div class="stat-row">
-            <span>Автомобиль</span>
-            <b>
-                ${order.car.brand}
-                ${order.car.model}
-            </b>
         </div>
 
-        <div class="stat-row">
-            <span>Неисправность</span>
-            <b>${repair.name}</b>
-        </div>
 
-        <div class="stat-row">
-            <span>🔩 Запчасть</span>
-            <b>${money(repair.partCost)}</b>
-        </div>
-
-        <div class="stat-row">
-            <span>🔧 Работа</span>
-            <b>${money(repair.workCost)}</b>
-        </div>
-
-        <div class="stat-row">
-            <span>💰 Себестоимость</span>
-            <b>${money(cost)}</b>
-        </div>
-
-        <p>
-            Ты сам устанавливаешь цену для клиента.
-        </p>
-
-        <input
-            id="repairPrice"
-            type="number"
-            value="${cost + 1200}"
-            min="${cost}"
-            step="100"
-            style="
-                width:100%;
-                box-sizing:border-box;
-                padding:12px;
-                margin:10px 0;
-                border-radius:10px;
-                border:1px solid #444;
-                background:#181c22;
-                color:#fff;
-                font-size:17px;
-            "
+        <button
+            class="action-button"
+            onclick="startDiagnosis()"
         >
-
-        <div class="diagnosis-result">
-
-            💡 Чем выше наценка,
-            тем больше потенциальная прибыль,
-            но клиент может отказаться.
-
-        </div>
-
-        <button
-            class="action-button"
-            onclick="offerRepair()">
-
-            🤝 Предложить цену
-
+            🔍 Перейти к диагностике
         </button>
 
     `);
@@ -1932,777 +300,1418 @@ function openRepairAgreement() {
 
 
 /* =========================================================
-   ЦЕНА
+   ПРОВЕРКА ОТДЕЛЬНЫХ ЗОН
 ========================================================= */
 
-function offerRepair() {
+function inspectArea(area) {
 
-    const order =
-        state.currentOrder;
+    const messages = {
 
-    const repair =
-        order.problem.repairs[
-            order.selectedCause
-        ];
+        engine: {
 
+            title: "⚙️ Подкапотное пространство",
 
-    const cost =
-        repair.partCost +
-        repair.workCost;
+            text:
+                "Проверяешь состояние двигателя, " +
+                "шлангов, разъёмов и видимых элементов. " +
+                "Пока серьёзных выводов делать нельзя — " +
+                "нужны дополнительные проверки."
+        },
 
 
-    const price =
-        Number(
-            $("repairPrice").value
-        );
+        battery: {
 
+            title: "🔋 Аккумулятор",
 
-    if (
-        !price ||
-        price < cost
-    ) {
+            text:
+                "Корпус без явных повреждений. " +
+                "Визуальный осмотр не заменяет " +
+                "измерение напряжения и проверку под нагрузкой."
+        },
 
-        showToast(
-            "Цена ниже себестоимости"
-        );
 
-        return;
-    }
+        brakes: {
 
+            title: "🛑 Тормоза",
 
-    const markup =
-        (price - cost) /
-        cost;
+            text:
+                "Внешне тормозной механизм выглядит " +
+                "без очевидных повреждений. " +
+                "Для оценки износа нужны дополнительные проверки."
+        },
 
 
-    let chance =
-        0.95 -
-        markup *
-        order.client.priceSensitivity;
+        suspension: {
 
+            title: "🛞 Подвеска",
 
-    chance =
-        Math.max(
-            0.10,
-            Math.min(
-                0.95,
-                chance
-            )
-        );
+            text:
+                "Визуально осматриваешь стойки, " +
+                "рычаги и пыльники. " +
+                "Часть неисправностей можно обнаружить " +
+                "только после проверки на подъёмнике."
+        },
 
 
-    const accepted =
-        Math.random() <
-        chance;
+        body: {
 
+            title: "🚘 Кузов",
 
-    order.repair = {
+            text:
+                "Проверяешь панели, фары, стёкла " +
+                "и следы ремонта. " +
+                "Явных повреждений в рамках этой проверки " +
+                "не обнаружено."
+        },
 
-        name:
-            repair.name,
 
-        partCost:
-            repair.partCost,
+        interior: {
 
-        workCost:
-            repair.workCost,
+            title: "🪑 Салон",
 
-        time:
-            repair.time,
-
-        cost:
-            cost,
-
-        price:
-            price,
-
-        profit:
-            price - cost
-    };
-
-
-    if (!accepted) {
-
-        save();
-
-        openModal(`
-
-            <h2>❌ Клиент отказался</h2>
-
-            <p>
-                Клиент посчитал ремонт слишком дорогим.
-            </p>
-
-            <div class="diagnosis-result">
-
-                💰 Диагностика всё равно оплачивается:
-                <b>${money(order.diagnosisPrice)}</b>
-
-            </div>
-
-            <button
-                class="action-button"
-                onclick="finishDiagnosisOnly()">
-
-                📋 Завершить заказ
-
-            </button>
-
-        `);
-
-        return;
-    }
-
-
-    order.agreed =
-        true;
-
-
-    save();
-
-    openModal(`
-
-        <h2>✅ Клиент согласен</h2>
-
-        <div class="stat-row">
-            <span>Цена ремонта</span>
-            <b>${money(price)}</b>
-        </div>
-
-        <div class="stat-row">
-            <span>Себестоимость</span>
-            <b>${money(cost)}</b>
-        </div>
-
-        <div class="stat-row">
-            <span>Прибыль</span>
-            <b>${money(price - cost)}</b>
-        </div>
-
-        <button
-            class="action-button"
-            onclick="performRepair()">
-
-            🔧 Начать ремонт
-
-        </button>
-
-    `);
-}
-
-
-/* =========================================================
-   РЕМОНТ
-========================================================= */
-
-function performRepair() {
-
-    const order =
-        state.currentOrder;
-
-    const repair =
-        order.repair;
-
-
-    if (
-        state.equipment < 2
-    ) {
-
-        showToast(
-            "🧰 Недостаточно ресурса оборудования"
-        );
-
-        return;
-    }
-
-
-    addTime(
-        repair.time
-    );
-
-    useEquipment(2);
-
-
-    state.money +=
-        repair.profit;
-
-
-    state.money +=
-        order.diagnosisPrice;
-
-
-    addXP(30);
-
-    addReputation(8);
-
-
-    order.completed =
-        true;
-
-    order.diagnosisPaid =
-        true;
-
-
-    state.history.push({
-
-        car:
-            `${order.car.brand} ${order.car.model}`,
-
-        problem:
-            order.problem.title,
-
-        profit:
-            repair.profit,
-
-        day:
-            state.day
-    });
-
-
-    save();
-
-    render();
-
-
-    openModal(`
-
-        <h2>🔧 Ремонт выполнен</h2>
-
-        <div class="stat-row">
-            <span>Запчасть</span>
-            <b>${repair.name}</b>
-        </div>
-
-        <div class="stat-row">
-            <span>⏱️ Время</span>
-            <b>${repair.time} мин</b>
-        </div>
-
-        <div class="stat-row">
-            <span>💰 Диагностика</span>
-            <b>+${money(order.diagnosisPrice)}</b>
-        </div>
-
-        <div class="stat-row">
-            <span>💵 Прибыль</span>
-            <b>+${money(repair.profit)}</b>
-        </div>
-
-        <div class="stat-row">
-            <span>⭐ Репутация</span>
-            <b>+8</b>
-        </div>
-
-        <button
-            class="action-button"
-            onclick="finishRepairCheck()">
-
-            🧪 Проверить результат
-
-        </button>
-
-    `);
-}
-
-
-/* =========================================================
-   ПРОВЕРКА ПОСЛЕ РЕМОНТА
-========================================================= */
-
-function finishRepairCheck() {
-
-    const order =
-        state.currentOrder;
-
-
-    openModal(`
-
-        <h2>🧪 Контрольная проверка</h2>
-
-        <p>
-            Автомобиль проверен после ремонта.
-        </p>
-
-        <div class="diagnosis-result">
-
-            ✅ Жалоба клиента устранена.<br><br>
-
-            Хорошая диагностика позволяет
-            не менять детали наугад и снижает
-            вероятность повторного ремонта.
-
-        </div>
-
-        <button
-            class="action-button"
-            onclick="newOrder()">
-
-            🚗 Следующий клиент
-
-        </button>
-
-    `);
-}
-
-
-/* =========================================================
-   ОПЛАТА ТОЛЬКО ДИАГНОСТИКИ
-========================================================= */
-
-function finishDiagnosisOnly() {
-
-    const order =
-        state.currentOrder;
-
-
-    if (
-        !order.diagnosisPaid
-    ) {
-
-        state.money +=
-            order.diagnosisPrice;
-
-        order.diagnosisPaid =
-            true;
-    }
-
-
-    addXP(15);
-
-
-    order.completed =
-        true;
-
-
-    state.history.push({
-
-        car:
-            `${order.car.brand} ${order.car.model}`,
-
-        problem:
-            order.problem.title,
-
-        profit:
-            order.diagnosisPrice,
-
-        day:
-            state.day
-    });
-
-
-    save();
-
-    render();
-
-
-    openModal(`
-
-        <h2>📋 Заказ завершён</h2>
-
-        <p>
-            Клиент отказался от ремонта,
-            но диагностику оплатил.
-        </p>
-
-        <div class="stat-row">
-            <span>💰 Диагностика</span>
-            <b>+${money(order.diagnosisPrice)}</b>
-        </div>
-
-        <div class="stat-row">
-            <span>📈 Опыт</span>
-            <b>+15 XP</b>
-        </div>
-
-        <button
-            class="action-button"
-            onclick="newOrder()">
-
-            🚗 Следующий клиент
-
-        </button>
-
-    `);
-}
-
-
-/* =========================================================
-   НОВЫЙ ЗАКАЗ
-========================================================= */
-
-function newOrder() {
-
-    state.day++;
-
-    state.time = 480;
-
-
-    /*
-       Немного восстанавливаем ресурс
-       оборудования между рабочими днями.
-    */
-
-    state.equipment =
-        Math.min(
-            100,
-            state.equipment + 5
-        );
-
-
-    generateOrder();
-
-    render();
-
-    closeModal();
-
-    showToast(
-        "🚗 Новый клиент приехал!"
-    );
-}
-
-
-/* =========================================================
-   БАЗА ЗНАНИЙ
-========================================================= */
-
-function openKnowledgeMenu() {
-
-    openModal(`
-
-        <h2>📚 База знаний</h2>
-
-        <p>
-            Здесь можно изучать устройство автомобиля
-            и методы диагностики.
-        </p>
-
-        <div class="diagnosis-list">
-
-            <button
-                class="diagnosis-button"
-                onclick="openKnowledge('engine')">
-                🔥 Двигатель
-            </button>
-
-            <button
-                class="diagnosis-button"
-                onclick="openKnowledge('electrical')">
-                ⚡ Электрика
-            </button>
-
-            <button
-                class="diagnosis-button"
-                onclick="openKnowledge('obd')">
-                💻 OBD-II и диагностика
-            </button>
-
-            <button
-                class="diagnosis-button"
-                onclick="openKnowledge('fuel')">
-                ⛽ Топливная система
-            </button>
-
-            <button
-                class="diagnosis-button"
-                onclick="openKnowledge('suspension')">
-                🛞 Подвеска
-            </button>
-
-            <button
-                class="diagnosis-button"
-                onclick="openKnowledge('brakes')">
-                🛑 Тормоза
-            </button>
-
-            <button
-                class="diagnosis-button"
-                onclick="openKnowledge('transmission')">
-                ⚙️ Трансмиссия
-            </button>
-
-            <button
-                class="diagnosis-button"
-                onclick="openKnowledge('cooling')">
-                💧 Охлаждение
-            </button>
-
-            <button
-                class="diagnosis-button"
-                onclick="openKnowledge('climate')">
-                ❄️ Кондиционер
-            </button>
-
-        </div>
-    `);
-}
-
-
-function openKnowledge(category) {
-
-    const articles =
-        knowledgeBase[category];
-
-
-    if (!articles) {
-
-        return;
-    }
-
-
-    let html = `
-
-        <h2>📚 ${getCategoryName(category)}</h2>
-    `;
-
-
-    articles.forEach(
-        article => {
-
-            html += `
-
-                <div class="diagnosis-result">
-
-                    <h3>
-                        ${article[0]}
-                    </h3>
-
-                    <p>
-                        ${article[1]}
-                    </p>
-
-                </div>
-
-            `;
+            text:
+                "Проверяешь приборную панель " +
+                "и органы управления. " +
+                "Информация о симптоме клиента " +
+                "подтверждается его жалобой."
         }
-    );
 
-
-    html += `
-
-        <button
-            class="action-button"
-            onclick="openKnowledgeMenu()">
-
-            ← Все разделы
-
-        </button>
-
-    `;
-
-
-    openModal(html);
-}
-
-
-function getCategoryName(category) {
-
-    const names = {
-
-        engine:
-            "🔥 Двигатель",
-
-        electrical:
-            "⚡ Электрика",
-
-        obd:
-            "💻 OBD-II",
-
-        fuel:
-            "⛽ Топливная система",
-
-        suspension:
-            "🛞 Подвеска",
-
-        brakes:
-            "🛑 Тормоза",
-
-        transmission:
-            "⚙️ Трансмиссия",
-
-        cooling:
-            "💧 Охлаждение",
-
-        climate:
-            "❄️ Кондиционер"
     };
 
 
-    return names[category]
-        || "База знаний";
+    const item = messages[area];
+
+    if (!item) {
+        return;
+    }
+
+
+    openModal(`
+
+        <h2>
+            ${item.title}
+        </h2>
+
+        <div class="diagnosis-result inspection-result">
+
+            ${item.text}
+
+        </div>
+
+
+        <button
+            class="action-button"
+            onclick="inspectCar()"
+        >
+            ← Вернуться к осмотру
+        </button>
+
+    `);
 }
+/* =========================================================
+   БЫСТРЫЕ ОБЪЕКТЫ ГАРАЖА
+========================================================= */
 
 
 /* =========================================================
    ИНСТРУМЕНТЫ
 ========================================================= */
 
-function openTools() {
+function openGarageTools() {
+
+    openTools();
+
+}
+
+
+/* =========================================================
+   OBD-II
+========================================================= */
+
+function openGarageOBD() {
+
+    const order = state.currentOrder;
+
+
+    if (!order) {
+
+        showToast(
+            "🚗 Сначала дождись автомобиля клиента"
+        );
+
+        return;
+    }
+
 
     openModal(`
 
-        <h2>🧰 Инструменты</h2>
+        <h2>💻 Диагностический пост</h2>
+
 
         <div class="stat-row">
-            <span>Базовый набор</span>
-            <b>Есть</b>
+
+            <span>
+                Сканер OBD-II
+            </span>
+
+            <b>
+                Готов
+            </b>
+
         </div>
+
 
         <div class="stat-row">
-            <span>Ресурс оборудования</span>
-            <b>${state.equipment}%</b>
+
+            <span>
+                Ресурс оборудования
+            </span>
+
+            <b>
+                ${state.equipment}%
+            </b>
+
         </div>
 
-        <p>
-            В будущем появятся:
-        </p>
+
+        <div class="diagnosis-result">
+
+            Подключение к автомобилю позволит
+            получить коды неисправностей и Live Data.
+
+        </div>
+
 
         <p>
-            💻 профессиональный сканер<br>
-            📊 осциллограф<br>
-            💨 дымогенератор<br>
-            🧪 тестер давления<br>
-            🔌 мультиметр<br>
-            🔧 подъёмник<br>
-            🔍 эндоскоп
+
+            ⚠️ Важно: код ошибки сам по себе
+            не означает, что необходимо сразу
+            менять деталь.
+
+            Сначала нужно понять причину появления
+            ошибки и подтвердить неисправность
+            дополнительными проверками.
+
         </p>
+
+
+        <button
+            class="action-button"
+            onclick="startDiagnosis()"
+        >
+
+            🔍 Открыть диагностику
+
+        </button>
 
     `);
+
 }
 
 
 /* =========================================================
-   АВТОМОБИЛИ
+   СКЛАД ЗАПЧАСТЕЙ
 ========================================================= */
 
-function openCars() {
+function openGarageParts() {
 
     openModal(`
 
-        <h2>🚘 Автомобили</h2>
+        <h2>
+            📦 Склад запчастей
+        </h2>
+
+
+        <div class="diagnosis-result">
+
+            Пока склад почти пуст.
+
+            Здесь в будущем появятся:
+
+            <br><br>
+
+            🔩 Новые запчасти
+            <br>
+            ♻️ Бывшие в употреблении детали
+            <br>
+            🔧 Восстановленные запчасти
+            <br>
+            🛢️ Расходные материалы
+
+        </div>
+
+
+        <div class="stat-row">
+
+            <span>
+                Запчасти
+            </span>
+
+            <b>
+                0
+            </b>
+
+        </div>
+
+
+        <div class="stat-row">
+
+            <span>
+                Восстановленные детали
+            </span>
+
+            <b>
+                0
+            </b>
+
+        </div>
+
+
+        <div class="stat-row">
+
+            <span>
+                Старые детали
+            </span>
+
+            <b>
+                0
+            </b>
+
+        </div>
+
 
         <p>
-            Сейчас автомобили принадлежат клиентам.
+
+            🔜 В будущем старые детали можно будет:
+
+            <br><br>
+
+            • восстановить;
+            <br>
+            • продать;
+            <br>
+            • установить клиенту;
+            <br>
+            • использовать как временное решение.
+
         </p>
 
-        <p>
-            В будущем здесь появится твой собственный
-            автомобиль и его обслуживание:
-        </p>
 
-        <p>
-            🔧 ремонт<br>
-            🛞 обслуживание<br>
-            🎨 внешний тюнинг<br>
-            ⚙️ технический тюнинг<br>
-            🏎️ улучшение характеристик
-        </p>
+        <div class="diagnosis-result">
+
+            ⚠️ Но есть риск.
+
+            Клиент может обнаружить,
+            что ему установили восстановленную
+            или старую деталь.
+
+            Это может привести к:
+
+            <br><br>
+
+            ⭐ снижению репутации;
+            <br>
+            💰 возврату денег;
+            <br>
+            😡 жалобе клиента;
+            <br>
+            📢 плохому отзыву.
+
+        </div>
 
     `);
+
 }
 
 
 /* =========================================================
-   СТО
+   ПЕРЕХОД В БАЗУ ЗНАНИЙ
 ========================================================= */
 
-function openService() {
+function openGarageKnowledge() {
+
+    if (typeof openKnowledgeMenu === "function") {
+
+        openKnowledgeMenu();
+
+        return;
+    }
+
 
     openModal(`
 
-        <h2>🏢 Развитие СТО</h2>
+        <h2>
+            📚 База знаний
+        </h2>
 
-        <div class="stat-row">
-            <span>Уровень</span>
-            <b>${state.garage.level}</b>
-        </div>
-
-        <div class="stat-row">
-            <span>Посты</span>
-            <b>${state.garage.posts}</b>
-        </div>
-
-        <div class="stat-row">
-            <span>День</span>
-            <b>${state.day}</b>
-        </div>
-
-        <div class="stat-row">
-            <span>Время</span>
-            <b>${timeText(state.time)}</b>
-        </div>
 
         <p>
-            🔜 Следующие этапы развития:
+
+            Здесь будет твоя большая база знаний
+            по ремонту автомобилей.
+
         </p>
 
-        <p>
-            второй пост → подъёмник →
-            склад → сотрудники →
-            диагностический пост →
-            большая СТО → сеть автосервисов
-        </p>
+
+        <div class="knowledge-preview">
+
+            🔧 Диагностика двигателя
+            <br><br>
+
+            💻 OBD-II и коды ошибок
+            <br><br>
+
+            ⚡ Автоэлектрика
+            <br><br>
+
+            🛞 Подвеска
+            <br><br>
+
+            🛑 Тормозная система
+            <br><br>
+
+            🛢️ Масла и жидкости
+
+        </div>
 
     `);
+
 }
 
 
 /* =========================================================
-   ОБУЧЕНИЕ
+   ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ
 ========================================================= */
 
-function openTraining() {
+function showGarageHint(text) {
 
-    openKnowledgeMenu();
-}
-
-
-/* =========================================================
-   КНОПКИ
-========================================================= */
-
-$("startDiagnosis").onclick =
-    startDiagnosis;
-
-$("trainingButton").onclick =
-    openTraining;
-
-$("toolsButton").onclick =
-    openTools;
-
-$("carsButton").onclick =
-    openCars;
-
-$("serviceButton").onclick =
-    openService;
-
-$("closeModal").onclick =
-    closeModal;
+    const hint =
+        document.querySelector(".garage-hint");
 
 
-$("modal").onclick =
-    event => {
+    if (!hint) {
+        return;
+    }
 
-        if (
-            event.target.id === "modal"
-        ) {
 
-            closeModal();
+    hint.textContent = text;
+
+
+    setTimeout(() => {
+
+        if (hint) {
+
+            hint.textContent =
+                "👆 Нажми на автомобиль, чтобы начать осмотр";
+
         }
-    };
 
+    }, 2500);
 
-/* =========================================================
-   ПЕРВЫЙ ЗАПУСК
+}/* =========================================================
+   ДЕТАЛЬНЫЙ ОСМОТР АВТОМОБИЛЯ
 ========================================================= */
 
-if (
-    !state.currentOrder
-) {
+function openDetailedCarInspection() {
 
-    generateOrder();
+    const order = state.currentOrder;
+
+    if (!order) {
+
+        showToast(
+            "🚗 Нет автомобиля для осмотра"
+        );
+
+        return;
+    }
+
+    openModal(`
+
+        <h2>
+            🚗 Осмотр автомобиля
+        </h2>
+
+        <div class="car-inspection-card">
+
+            <div class="inspection-car-icon">
+                🚘
+            </div>
+
+            <div>
+
+                <h3>
+                    ${order.car.brand}
+                    ${order.car.model}
+                </h3>
+
+                <p>
+                    ${order.car.year} год
+                    ·
+                    ${order.car.mileage.toLocaleString("ru-RU")} км
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <p>
+            Выбери область автомобиля,
+            которую хочешь проверить.
+        </p>
+
+
+        <div class="inspection-grid">
+
+
+            <!-- КАПОТ -->
+
+            <button
+                class="inspection-button"
+                onclick="openHood()"
+            >
+
+                <span>
+                    🔧
+                </span>
+
+                <b>
+                    Открыть капот
+                </b>
+
+                <small>
+                    Осмотр моторного отсека
+                </small>
+
+            </button>
+
+
+            <!-- КОЛЁСА -->
+
+            <button
+                class="inspection-button"
+                onclick="inspectWheels()"
+            >
+
+                <span>
+                    🛞
+                </span>
+
+                <b>
+                    Колёса
+                </b>
+
+                <small>
+                    Шины и состояние колёс
+                </small>
+
+            </button>
+
+
+            <!-- ТОРМОЗА -->
+
+            <button
+                class="inspection-button"
+                onclick="inspectBrakes()"
+            >
+
+                <span>
+                    🛑
+                </span>
+
+                <b>
+                    Тормоза
+                </b>
+
+                <small>
+                    Диски и колодки
+                </small>
+
+            </button>
+
+
+            <!-- ПОДВЕСКА -->
+
+            <button
+                class="inspection-button"
+                onclick="inspectSuspension()"
+            >
+
+                <span>
+                    🔩
+                </span>
+
+                <b>
+                    Подвеска
+                </b>
+
+                <small>
+                    Люфты и повреждения
+                </small>
+
+            </button>
+
+
+            <!-- КУЗОВ -->
+
+            <button
+                class="inspection-button"
+                onclick="inspectBody()"
+            >
+
+                <span>
+                    🚘
+                </span>
+
+                <b>
+                    Кузов
+                </b>
+
+                <small>
+                    Внешний осмотр
+                </small>
+
+            </button>
+
+
+            <!-- САЛОН -->
+
+            <button
+                class="inspection-button"
+                onclick="inspectInterior()"
+            >
+
+                <span>
+                    🪑
+                </span>
+
+                <b>
+                    Салон
+                </b>
+
+                <small>
+                    Приборы и органы управления
+                </small>
+
+            </button>
+
+        </div>
+
+
+        <button
+            class="action-button"
+            onclick="startDiagnosis()"
+        >
+
+            🔍 Перейти к диагностике
+
+        </button>
+
+    `);
 }
 
 
-render();
+/* =========================================================
+   ОТКРЫТИЕ КАПОТА
+========================================================= */
 
-save();
+function openHood() {
+
+    const order = state.currentOrder;
+
+    if (!order) {
+        return;
+    }
+
+
+    openModal(`
+
+        <h2>
+            🔧 Моторный отсек
+        </h2>
+
+
+        <div class="engine-bay">
+
+            <div class="engine-bay-car">
+
+                🚗
+
+            </div>
+
+
+            <div class="engine-part-grid">
+
+
+                <button
+                    class="engine-part"
+                    onclick="inspectEngine()"
+                >
+
+                    <span>
+                        ⚙️
+                    </span>
+
+                    <b>
+                        Двигатель
+                    </b>
+
+                    <small>
+                        Работа двигателя
+                    </small>
+
+                </button>
+
+
+                <button
+                    class="engine-part"
+                    onclick="inspectBattery()"
+                >
+
+                    <span>
+                        🔋
+                    </span>
+
+                    <b>
+                        Аккумулятор
+                    </b>
+
+                    <small>
+                        Напряжение и запуск
+                    </small>
+
+                </button>
+
+
+                <button
+                    class="engine-part"
+                    onclick="inspectCooling()"
+                >
+
+                    <span>
+                        💧
+                    </span>
+
+                    <b>
+                        Охлаждение
+                    </b>
+
+                    <small>
+                        Жидкость и система охлаждения
+                    </small>
+
+                </button>
+
+
+                <button
+                    class="engine-part"
+                    onclick="inspectBelts()"
+                >
+
+                    <span>
+                        🔄
+                    </span>
+
+                    <b>
+                        Ремни
+                    </b>
+
+                    <small>
+                        Состояние приводов
+                    </small>
+
+                </button>
+
+
+                <button
+                    class="engine-part"
+                    onclick="inspectElectrical()"
+                >
+
+                    <span>
+                        ⚡
+                    </span>
+
+                    <b>
+                        Электрика
+                    </b>
+
+                    <small>
+                        Разъёмы и проводка
+                    </small>
+
+                </button>
+
+
+                <button
+                    class="engine-part"
+                    onclick="inspectFluids()"
+                >
+
+                    <span>
+                        🛢️
+                    </span>
+
+                    <b>
+                        Жидкости
+                    </b>
+
+                    <small>
+                        Масло и технические жидкости
+                    </small>
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <button
+            class="action-button"
+            onclick="openDetailedCarInspection()"
+        >
+
+            ← Вернуться к автомобилю
+
+        </button>
+
+    `);
+}
+
+
+/* =========================================================
+   ДВИГАТЕЛЬ
+========================================================= */
+
+function inspectEngine() {
+
+    openModal(`
+
+        <h2>
+            ⚙️ Двигатель
+        </h2>
+
+
+        <div class="diagnosis-result">
+
+            Визуальный осмотр двигателя
+            не выявил очевидных повреждений.
+
+            <br><br>
+
+            Но визуально невозможно определить
+            состояние многих внутренних компонентов.
+
+        </div>
+
+
+        <div class="stat-row">
+
+            <span>
+                Внешние повреждения
+            </span>
+
+            <b>
+                Не обнаружены
+            </b>
+
+        </div>
+
+
+        <div class="stat-row">
+
+            <span>
+                Посторонние звуки
+            </span>
+
+            <b>
+                Требуется проверка
+            </b>
+
+        </div>
+
+
+        <p>
+
+            Для дальнейшей диагностики можно
+            использовать:
+
+            <br><br>
+
+            🔊 прослушивание двигателя
+            <br>
+            💻 OBD-II
+            <br>
+            📊 Live Data
+            <br>
+            🧪 дополнительные измерения
+
+        </p>
+
+
+        <button
+            class="action-button"
+            onclick="openHood()"
+        >
+
+            ← Назад
+
+        </button>
+
+    `);
+}
+
+
+/* =========================================================
+   АККУМУЛЯТОР
+========================================================= */
+
+function inspectBattery() {
+
+    openModal(`
+
+        <h2>
+            🔋 Аккумулятор
+        </h2>
+
+
+        <div class="diagnosis-result">
+
+            Визуально аккумулятор выглядит
+            исправным.
+
+            Однако состояние аккумулятора
+            нельзя надёжно определить только
+            по внешнему виду.
+
+        </div>
+
+
+        <p>
+
+            Можно выполнить:
+
+            <br><br>
+
+            🔋 измерение напряжения;
+            <br>
+            ⚡ проверку при запуске;
+            <br>
+            🔧 проверку генератора;
+            <br>
+            📊 анализ параметров зарядки.
+
+        </p>
+
+
+        <button
+            class="action-button"
+            onclick="openHood()"
+        >
+
+            ← Назад
+
+        </button>
+
+    `);
+}
+
+
+/* =========================================================
+   ОХЛАЖДЕНИЕ
+========================================================= */
+
+function inspectCooling() {
+
+    openModal(`
+
+        <h2>
+            💧 Система охлаждения
+        </h2>
+
+
+        <div class="diagnosis-result">
+
+            Проверяешь уровень охлаждающей жидкости,
+            расширительный бачок и видимые соединения.
+
+        </div>
+
+
+        <div class="stat-row">
+
+            <span>
+                Уровень жидкости
+            </span>
+
+            <b>
+                Норма
+            </b>
+
+        </div>
+
+
+        <div class="stat-row">
+
+            <span>
+                Видимые утечки
+            </span>
+
+            <b>
+                Не обнаружены
+            </b>
+
+        </div>
+
+
+        <p>
+
+            Для полноценной проверки потребуются
+            дополнительные диагностические процедуры.
+
+        </p>
+
+
+        <button
+            class="action-button"
+            onclick="openHood()"
+        >
+
+            ← Назад
+
+        </button>
+
+    `);
+}
+
+
+/* =========================================================
+   РЕМНИ
+========================================================= */
+
+function inspectBelts() {
+
+    openModal(`
+
+        <h2>
+            🔄 Приводные ремни
+        </h2>
+
+
+        <div class="diagnosis-result">
+
+            Проверяешь ремни на наличие трещин,
+            следов износа и повреждений.
+
+        </div>
+
+
+        <p>
+
+            Визуальная проверка полезна,
+            но не позволяет определить
+            все возможные проблемы.
+
+        </p>
+
+
+        <button
+            class="action-button"
+            onclick="openHood()"
+        >
+
+            ← Назад
+
+        </button>
+
+    `);
+}
+
+
+/* =========================================================
+   ЭЛЕКТРИКА
+========================================================= */
+
+function inspectElectrical() {
+
+    openModal(`
+
+        <h2>
+            ⚡ Электрика
+        </h2>
+
+
+        <div class="diagnosis-result">
+
+            Осматриваешь видимые разъёмы,
+            проводку и предохранители.
+
+        </div>
+
+
+        <p>
+
+            Некоторые электрические неисправности
+            невозможно обнаружить без измерений
+            и диагностического оборудования.
+
+        </p>
+
+
+        <button
+            class="action-button"
+            onclick="openHood()"
+        >
+
+            ← Назад
+
+        </button>
+
+    `);
+}
+
+
+/* =========================================================
+   ЖИДКОСТИ
+========================================================= */
+
+function inspectFluids() {
+
+    openModal(`
+
+        <h2>
+            🛢️ Технические жидкости
+        </h2>
+
+
+        <div class="diagnosis-result">
+
+            Проверяешь масло и другие доступные
+            для визуального контроля жидкости.
+
+        </div>
+
+
+        <div class="stat-row">
+
+            <span>
+                Визуальное состояние
+            </span>
+
+            <b>
+                Без явных отклонений
+            </b>
+
+        </div>
+
+
+        <p>
+
+            Для некоторых проверок потребуются
+            дополнительные инструменты.
+
+        </p>
+
+
+        <button
+            class="action-button"
+            onclick="openHood()"
+        >
+
+            ← Назад
+
+        </button>
+
+    `);
+}/* =========================================================
+   КОЛЁСА
+========================================================= */
+
+function inspectWheels() {
+
+    openModal(`
+
+        <h2>
+            🛞 Колёса и шины
+        </h2>
+
+        <div class="diagnosis-result">
+
+            Проверяешь состояние шин,
+            равномерность износа и видимые повреждения.
+
+        </div>
+
+        <div class="stat-row">
+            <span>Протектор</span>
+            <b>Проверить</b>
+        </div>
+
+        <div class="stat-row">
+            <span>Давление</span>
+            <b>Требует измерения</b>
+        </div>
+
+        <div class="stat-row">
+            <span>Видимые повреждения</span>
+            <b>Не обнаружены</b>
+        </div>
+
+        <p>
+            Для полноценной проверки можно измерить
+            давление, проверить балансировку и
+            состояние дисков.
+        </p>
+
+        <button
+            class="action-button"
+            onclick="openDetailedCarInspection()"
+        >
+            ← Назад
+        </button>
+
+    `);
+}
+
+
+/* =========================================================
+   ТОРМОЗА
+========================================================= */
+
+function inspectBrakes() {
+
+    openModal(`
+
+        <h2>
+            🛑 Тормозная система
+        </h2>
+
+        <div class="diagnosis-result">
+
+            Визуально проверяешь тормозные диски,
+            колодки и видимые элементы системы.
+
+        </div>
+
+        <div class="stat-row">
+            <span>Колодки</span>
+            <b>Нужна проверка</b>
+        </div>
+
+        <div class="stat-row">
+            <span>Диски</span>
+            <b>Нужна проверка</b>
+        </div>
+
+        <div class="stat-row">
+            <span>Утечки</span>
+            <b>Не обнаружены</b>
+        </div>
+
+        <p>
+            Для более точной диагностики потребуется
+            измерение толщины дисков и колодок,
+            а также проверка тормозной жидкости.
+        </p>
+
+        <button
+            class="action-button"
+            onclick="openDetailedCarInspection()"
+        >
+            ← Назад
+        </button>
+
+    `);
+}
+
+
+/* =========================================================
+   ПОДВЕСКА
+========================================================= */
+
+function inspectSuspension() {
+
+    openModal(`
+
+        <h2>
+            🔩 Подвеска
+        </h2>
+
+        <div class="diagnosis-result">
+
+            Проверяешь стойки, рычаги,
+            сайлентблоки и пыльники.
+
+        </div>
+
+        <div class="stat-row">
+            <span>Амортизаторы</span>
+            <b>Требуют проверки</b>
+        </div>
+
+        <div class="stat-row">
+            <span>Пыльники</span>
+            <b>Визуально без повреждений</b>
+        </div>
+
+        <div class="stat-row">
+            <span>Люфты</span>
+            <b>Нужна проверка</b>
+        </div>
+
+        <p>
+            Некоторые неисправности подвески можно
+            обнаружить только на подъёмнике.
+        </p>
+
+        <button
+            class="action-button"
+            onclick="openDetailedCarInspection()"
+        >
+            ← Назад
+        </button>
+
+    `);
+}
+
+
+/* =========================================================
+   КУЗОВ
+========================================================= */
+
+function inspectBody() {
+
+    openModal(`
+
+        <h2>
+            🚘 Кузов
+        </h2>
+
+        <div class="diagnosis-result">
+
+            Проводишь внешний осмотр автомобиля.
+
+        </div>
+
+        <div class="stat-row">
+            <span>Стёкла</span>
+            <b>Без явных повреждений</b>
+        </div>
+
+        <div class="stat-row">
+            <span>Фары</span>
+            <b>Проверить</b>
+        </div>
+
+        <div class="stat-row">
+            <span>Следы ремонта</span>
+            <b>Не обнаружены</b>
+        </div>
+
+        <p>
+            В будущем здесь появится более подробный
+            осмотр кузова: толщина краски, коррозия,
+            геометрия кузова и следы ДТП.
+        </p>
+
+        <button
+            class="action-button"
+            onclick="openDetailedCarInspection()"
+        >
+            ← Назад
+        </button>
+
+    `);
+}
+
+
+/* =========================================================
+   САЛОН
+========================================================= */
+
+function inspectInterior() {
+
+    openModal(`
+
+        <h2>
+            🪑 Салон автомобиля
+        </h2>
+
+        <div class="diagnosis-result">
+
+            Проверяешь приборную панель,
+            органы управления и состояние салона.
+
+        </div>
+
+        <div class="stat-row">
+            <span>Панель приборов</span>
+            <b>Работает</b>
+        </div>
+
+        <div class="stat-row">
+            <span>Контрольные лампы</span>
+            <b>Проверить</b>
+        </div>
+
+        <div class="stat-row">
+            <span>Электрооборудование</span>
+            <b>Требует проверки</b>
+        </div>
+
+        <p>
+            В будущем можно будет отдельно проверять
+            кондиционер, мультимедиа, стеклоподъёмники,
+            центральный замок и другое оборудование.
+        </p>
+
+        <button
+            class="action-button"
+            onclick="openDetailedCarInspection()"
+        >
+            ← Назад
+        </button>
+
+    `);
+}
+
+
+/* =========================================================
+   ДОПОЛНИТЕЛЬНАЯ АНИМАЦИЯ
+========================================================= */
+
+function animateGarageCar() {
+
+    const car =
+        document.getElementById("visualCar");
+
+    if (!car) {
+        return;
+    }
+
+    car.classList.remove("car-inspection-animation");
+
+    void car.offsetWidth;
+
+    car.classList.add("car-inspection-animation");
+
+}
+
+
+/* =========================================================
+   ИНИЦИАЛИЗАЦИЯ ВИЗУАЛЬНОГО ГАРАЖА
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        setTimeout(() => {
+
+            renderGarageScene();
+
+        }, 100);
+
+    }
+);
