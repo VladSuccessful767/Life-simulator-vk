@@ -776,3 +776,404 @@ main {
         height: 190px;
     }
 }
+
+
+/* =========================================================
+   FIX V4 — ВИЗУАЛЬНЫЙ ГАРАЖ
+   Не меняет механику игры/диагностики.
+========================================================= */
+
+.garage-visual-container {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    height: 260px !important;
+    min-height: 260px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    isolation: isolate !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+}
+
+.garage-scene {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 14px !important;
+    background:
+        linear-gradient(180deg, #303943 0%, #252c34 54%, #171b20 55%, #101318 100%) !important;
+}
+
+.garage-scene::after {
+    content: "" !important;
+    position: absolute !important;
+    left: -10% !important;
+    right: -10% !important;
+    bottom: -8px !important;
+    height: 80px !important;
+    z-index: 0 !important;
+    background:
+        repeating-linear-gradient(
+            90deg,
+            rgba(255,255,255,.035) 0 2px,
+            transparent 2px 34px
+        ),
+        linear-gradient(180deg, #171b20, #0d1014) !important;
+    transform: perspective(150px) rotateX(22deg) !important;
+    transform-origin: bottom !important;
+}
+
+.garage-ceiling-light {
+    position: absolute !important;
+    left: 16% !important;
+    right: 16% !important;
+    top: 16px !important;
+    height: 7px !important;
+    z-index: 1 !important;
+    border-radius: 50% !important;
+    background: #dce5eb !important;
+    box-shadow: 0 0 12px rgba(220,230,240,.75), 0 0 30px rgba(220,230,240,.25) !important;
+}
+
+.garage-sign {
+    position: absolute !important;
+    top: 32px !important;
+    left: 18px !important;
+    z-index: 3 !important;
+    padding: 5px 9px !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    border-radius: 7px !important;
+    background: rgba(15,19,24,.7) !important;
+    color: #dfe6ec !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+}
+
+.garage-shelf {
+    position: absolute !important;
+    top: 34px !important;
+    right: 18px !important;
+    z-index: 2 !important;
+    display: flex !important;
+    gap: 7px !important;
+    padding: 6px 8px !important;
+    border: 1px solid rgba(255,255,255,.08) !important;
+    border-radius: 7px !important;
+    background: rgba(12,16,20,.58) !important;
+    font-size: 15px !important;
+}
+
+.garage-lift {
+    position: absolute !important;
+    top: 70px !important;
+    bottom: 44px !important;
+    width: 8px !important;
+    z-index: 1 !important;
+    border-radius: 4px !important;
+    background: linear-gradient(180deg,#66727d,#343d46) !important;
+    box-shadow: 0 0 8px rgba(0,0,0,.35) !important;
+}
+
+.lift-left { left: 9% !important; }
+.lift-right { right: 9% !important; }
+
+.garage-car {
+    position: absolute !important;
+    left: 50% !important;
+    bottom: 56px !important;
+    width: 64% !important;
+    height: 82px !important;
+    z-index: 3 !important;
+    transform: translateX(-50%) !important;
+    border: 0 !important;
+    border-radius: 36px 42px 14px 14px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+}
+
+.car-shadow {
+    position: absolute !important;
+    left: 3% !important;
+    right: 3% !important;
+    bottom: -10px !important;
+    height: 18px !important;
+    border-radius: 50% !important;
+    background: rgba(0,0,0,.55) !important;
+    filter: blur(5px) !important;
+}
+
+.car-body {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 68px !important;
+    border: 2px solid #778591 !important;
+    border-radius: 28px 36px 13px 13px !important;
+    background: linear-gradient(180deg,#71808c 0%,#4d5a65 42%,#29313a 100%) !important;
+    box-shadow: inset 0 8px 12px rgba(255,255,255,.12), 0 8px 16px rgba(0,0,0,.4) !important;
+}
+
+.car-roof {
+    position: absolute !important;
+    left: 24% !important;
+    top: -28px !important;
+    width: 52% !important;
+    height: 38px !important;
+    border: 2px solid #6f7d88 !important;
+    border-bottom: 0 !important;
+    border-radius: 35px 35px 0 0 !important;
+    background: #46535e !important;
+}
+
+.car-window {
+    position: absolute !important;
+    top: -22px !important;
+    height: 27px !important;
+    border: 1px solid #83919b !important;
+    background: linear-gradient(135deg,#1a252d,#34424d) !important;
+}
+
+.front-window {
+    left: 28% !important;
+    width: 22% !important;
+    transform: skewX(-8deg) !important;
+    border-radius: 8px 3px 0 0 !important;
+}
+
+.rear-window {
+    right: 27% !important;
+    width: 20% !important;
+    transform: skewX(8deg) !important;
+    border-radius: 3px 8px 0 0 !important;
+}
+
+.car-hood {
+    position: absolute !important;
+    left: 2% !important;
+    top: 13px !important;
+    width: 25% !important;
+    height: 31px !important;
+    border-radius: 18px 8px 6px 12px !important;
+    background: linear-gradient(180deg,#687681,#394650) !important;
+}
+
+.car-headlight {
+    position: absolute !important;
+    top: 32px !important;
+    width: 20px !important;
+    height: 9px !important;
+    border-radius: 50% !important;
+    background: #e8f3fb !important;
+    box-shadow: 0 0 9px rgba(220,240,255,.8) !important;
+}
+
+.left-headlight { left: 4% !important; }
+.right-headlight { right: 4% !important; }
+
+.car-grille {
+    position: absolute !important;
+    left: 43% !important;
+    bottom: 8px !important;
+    width: 14% !important;
+    height: 12px !important;
+    border: 2px solid #1b2229 !important;
+    border-radius: 3px !important;
+    background: repeating-linear-gradient(90deg,#151a1f 0 2px,#3e4851 2px 4px) !important;
+}
+
+.car-wheel {
+    position: absolute !important;
+    bottom: -17px !important;
+    width: 40px !important;
+    height: 40px !important;
+    border: 6px solid #313a43 !important;
+    border-radius: 50% !important;
+    background: #0e1115 !important;
+    box-shadow: inset 0 0 0 5px #171d22 !important;
+}
+
+.left-wheel { left: 12% !important; }
+.right-wheel { right: 12% !important; }
+
+.car-nameplate {
+    position: absolute !important;
+    left: 50% !important;
+    bottom: -42px !important;
+    transform: translateX(-50%) !important;
+    z-index: 5 !important;
+    width: max-content !important;
+    max-width: 90% !important;
+    padding: 4px 8px !important;
+    border-radius: 7px !important;
+    background: rgba(10,13,16,.78) !important;
+    color: #d7dee5 !important;
+    font-size: 10px !important;
+    white-space: nowrap !important;
+}
+
+.garage-hotspot {
+    z-index: 6 !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+}
+
+.hotspot-tools { left: 12px !important; bottom: 12px !important; }
+.hotspot-obd { left: 98px !important; bottom: 12px !important; }
+.hotspot-parts { right: 104px !important; bottom: 12px !important; }
+.hotspot-knowledge { right: 12px !important; bottom: 12px !important; }
+
+.garage-hotspot span {
+    display: inline !important;
+    margin-left: 3px !important;
+    font-size: 10px !important;
+}
+
+.garage-hint {
+    position: absolute !important;
+    left: 50% !important;
+    top: 62% !important;
+    z-index: 4 !important;
+    width: max-content !important;
+    max-width: 80% !important;
+    transform: translate(-50%,-50%) !important;
+    padding: 5px 8px !important;
+    border-radius: 7px !important;
+    background: rgba(10,13,16,.62) !important;
+    color: #c8d0d7 !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+    pointer-events: none !important;
+}
+
+.garage-car:hover .car-body {
+    filter: brightness(1.08) !important;
+}
+
+@keyframes garageCarFloatV4 {
+    0%,100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-2px); }
+}
+
+.garage-car {
+    animation: garageCarFloatV4 2.8s ease-in-out infinite !important;
+}
+
+.inspection-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+    gap: 8px !important;
+    margin-top: 12px !important;
+}
+
+.inspection-button,
+.engine-part {
+    min-height: 82px !important;
+    padding: 10px !important;
+    border: 1px solid #303943 !important;
+    border-radius: 11px !important;
+    background: #171b20 !important;
+    color: #f2f4f7 !important;
+    text-align: left !important;
+    cursor: pointer !important;
+}
+
+.inspection-button span,
+.engine-part span {
+    display: block !important;
+    margin-bottom: 5px !important;
+    font-size: 22px !important;
+}
+
+.inspection-button b,
+.engine-part b {
+    display: block !important;
+    font-size: 12px !important;
+}
+
+.inspection-button small,
+.engine-part small {
+    display: block !important;
+    margin-top: 4px !important;
+    color: #8993a0 !important;
+    font-size: 10px !important;
+}
+
+.car-inspection-card {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-bottom: 12px !important;
+    padding: 10px !important;
+    border: 1px solid #303943 !important;
+    border-radius: 11px !important;
+    background: #171b20 !important;
+}
+
+.inspection-car-icon {
+    display: grid !important;
+    place-items: center !important;
+    width: 52px !important;
+    height: 52px !important;
+    flex: 0 0 52px !important;
+    border-radius: 10px !important;
+    background: #272e36 !important;
+    font-size: 28px !important;
+}
+
+.engine-bay {
+    margin-top: 10px !important;
+}
+
+.engine-bay-car {
+    display: grid !important;
+    place-items: center !important;
+    height: 100px !important;
+    margin-bottom: 10px !important;
+    border: 1px solid #303943 !important;
+    border-radius: 12px !important;
+    background: linear-gradient(180deg,#303943,#151a1f) !important;
+    font-size: 58px !important;
+}
+
+.engine-part-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+    gap: 8px !important;
+}
+
+@media (max-width: 500px) {
+    .garage-visual-container {
+        height: 230px !important;
+        min-height: 230px !important;
+    }
+
+    .garage-car {
+        width: 68% !important;
+        bottom: 53px !important;
+    }
+
+    .garage-hotspot {
+        padding: 6px 7px !important;
+    }
+
+    .garage-hotspot span {
+        display: none !important;
+    }
+
+    .garage-sign {
+        top: 31px !important;
+    }
+
+    .garage-shelf {
+        top: 31px !important;
+    }
+}
