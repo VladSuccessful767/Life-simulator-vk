@@ -1,20 +1,511 @@
-*{box-sizing:border-box}
-body{margin:0;background:#0b1017 !important;color:#f5f7fb;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-.app{width:min(760px,100%);margin:auto;padding:14px 12px 24px}
-.eyebrow{font-size:9px;letter-spacing:2px;color:#73819a}.app h1{font-size:25px;margin:2px 0 0}.app header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-header button{background:#18202c;border:1px solid #283244;color:#fff;border-radius:12px;width:40px;height:40px;font-size:20px}
-.hud{display:flex;gap:11px;background:#151c27;border:1px solid #273142;border-radius:17px;padding:11px;margin-bottom:10px}.avatar{width:52px;height:52px;background:#263143;border-radius:14px;display:grid;place-items:center;font-size:28px}.bars{flex:1}.bars b{font-size:12px}.xp{height:6px;background:#283244;border-radius:10px;margin:7px 0}.xp i{display:block;width:0;height:100%;background:#5b8cff;border-radius:10px}.nums{font-size:10px;color:#8895aa;white-space:nowrap}.nums strong{color:#e7ebf3}
-.city{height:430px;position:relative;overflow:hidden;border-radius:22px;border:1px solid #2a3444;background:linear-gradient(#273c52 0 30%,#314b3c 30% 100%);box-shadow:inset 0 -70px 0 #26382f}.sky{height:85px;padding:12px 14px;font-size:28px;background:linear-gradient(#263a51,#344e65)}.sky span{font-size:12px;font-weight:800;letter-spacing:1px;vertical-align:middle;color:#dce5ef}.road{position:absolute;background:#252d35;box-shadow:inset 0 0 0 2px #303a44}.r1{height:52px;width:120%;left:-10%;top:250px;transform:rotate(-8deg)}.r2{width:55px;height:100%;left:47%;top:0;transform:rotate(9deg)}
-.building{position:absolute;border:0;border-radius:15px;background:#151d29dd;border:1px solid #435067;color:#fff;padding:8px 7px;width:125px;text-align:center;cursor:pointer;box-shadow:0 7px 20px #0005}.building span{font-size:29px;display:block}.building b{display:block;font-size:12px}.building small{color:#8794a9;font-size:9px}.b-home{left:6%;top:112px}.b-work{right:5%;top:105px}.b-study{left:5%;top:295px}.b-gym{right:5%;top:300px}.b-auto{left:37%;top:180px}.b-shop{left:37%;top:325px}
-.goals{background:#151c27;border:1px solid #273142;border-radius:17px;padding:11px;margin-top:10px}.title{font-weight:800;font-size:13px;margin-bottom:6px}.goal{display:flex;justify-content:space-between;padding:7px 2px;border-top:1px solid #242d3b;font-size:11px;color:#aab4c5}.goal b{color:#fff}
-nav{position:sticky;bottom:0;display:grid;grid-template-columns:repeat(5,1fr);gap:5px;background:#101722ee;backdrop-filter:blur(10px);padding:9px 3px;margin-top:10px;border-radius:17px;border:1px solid #273142}nav button{background:transparent;border:0;color:#8591a5;font-size:19px;padding:4px;cursor:pointer}nav button.active{color:#fff}nav small{display:block;font-size:8px;margin-top:2px}footer{text-align:center;color:#566276;font-size:9px;margin-top:10px}
-.modal{position:fixed;inset:0;background:#0009;display:none;align-items:flex-end;justify-content:center;padding:10px;z-index:10}.modal.show{display:flex}.modalBox{width:min(620px,100%);background:#151c27 !important;border:1px solid #303b4e;border-radius:22px;padding:18px;position:relative;max-height:80vh;overflow:auto;color:#f5f7fb !important}.close{position:absolute;right:12px;top:10px;border:0;background:#252f3e;color:#fff;border-radius:10px;width:34px;height:34px;font-size:22px}.modalBox h2{margin:0 35px 8px 0;font-size:19px}.modalBox p{color:#9aa6b9;font-size:12px;line-height:1.5}.actionBtn{width:100%;padding:12px;border:0;border-radius:12px;background:#5b8cff;color:#fff;font-weight:800;margin-top:8px}.statrow{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #273142;font-size:12px}
-/* ===== ПРОФИЛЬ ГЕРОЯ: ИСПРАВЛЕННЫЕ КАРТОЧКИ ===== */
-.profileGrid{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:14px !important;margin:16px 0 22px !important}
-.profileGrid > div{background:#202838 !important;background-color:#202838 !important;color:#fff !important;border:1px solid #344158 !important;border-radius:18px !important;padding:18px !important;min-height:92px !important;box-shadow:0 6px 18px #0004 !important}
-.profileGrid span{display:block !important;color:#aeb9cc !important;font-size:17px !important;margin-bottom:7px !important}.profileGrid b{display:block !important;color:#fff !important;font-size:20px !important;font-weight:800 !important;line-height:1.2 !important}
-.modalBox .heroSub{color:#aeb9cc !important;font-size:17px !important}.modalBox .sectionTitle{color:#fff !important;font-size:24px !important;margin:18px 0 10px !important}
-.skillBar{height:12px !important;background:#dfe4ed !important;border-radius:99px !important;overflow:hidden !important;margin:7px 0 14px !important}.skillBar i{display:block !important;height:100% !important;background:#6b8cff !important;border-radius:99px !important}.skillRow{color:#fff !important;font-size:18px !important}.skillRow b{color:#fff !important}
-.profileGrid > div,.profileGrid > div span,.profileGrid > div b{opacity:1 !important;filter:none !important}
-@media (max-width:600px){.profileGrid{gap:10px !important}.profileGrid > div{padding:15px !important;min-height:82px !important;border-radius:17px !important}.profileGrid span{font-size:16px !important}.profileGrid b{font-size:18px !important}}
-@media (max-width:420px){.city{height:420px}.building{width:112px}.b-auto,.b-shop{left:35%}}
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    font-family: Arial, sans-serif;
+    background: #101318;
+    color: #f2f4f7;
+}
+
+body {
+    min-height: 100vh;
+}
+
+button {
+    font: inherit;
+}
+
+.app {
+    width: 100%;
+    max-width: 520px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: #171b21;
+    overflow-x: hidden;
+}
+
+/* =========================
+   Верхняя панель
+========================= */
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 18px 16px;
+    background: #20252d;
+    border-bottom: 1px solid #303640;
+}
+
+.game-title {
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.game-subtitle {
+    margin-top: 3px;
+    color: #9da6b2;
+    font-size: 13px;
+}
+
+.player-level {
+    text-align: right;
+    background: #2a3039;
+    padding: 7px 12px;
+    border-radius: 12px;
+}
+
+.player-level span {
+    display: block;
+    color: #9da6b2;
+    font-size: 11px;
+}
+
+.player-level b {
+    font-size: 18px;
+}
+
+/* =========================
+   Статистика
+========================= */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 12px;
+    background: #12161b;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 10px 8px;
+    background: #20252d;
+    border: 1px solid #303640;
+    border-radius: 12px;
+}
+
+.stat > span {
+    font-size: 20px;
+}
+
+.stat small {
+    display: block;
+    color: #8f98a5;
+    font-size: 10px;
+}
+
+.stat b {
+    display: block;
+    margin-top: 2px;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+/* =========================
+   Основная область
+========================= */
+
+main {
+    padding: 12px;
+}
+
+.garage-card,
+.order-card {
+    margin-bottom: 12px;
+    padding: 15px;
+    background: #20252d;
+    border: 1px solid #303640;
+    border-radius: 16px;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.18);
+}
+
+.section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.section-title h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.garage-level,
+.order-status {
+    padding: 5px 8px;
+    border-radius: 8px;
+    background: #2b323c;
+    color: #aeb7c3;
+    font-size: 11px;
+}
+
+/* =========================
+   Гараж
+========================= */
+
+.garage-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 125px;
+    margin-bottom: 12px;
+    border-radius: 13px;
+    background:
+        linear-gradient(
+            135deg,
+            #252b34,
+            #15191f
+        );
+    border: 1px solid #343b46;
+    font-size: 55px;
+}
+
+.garage-description {
+    margin: 0 0 14px;
+    color: #aeb6c1;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.garage-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+}
+
+.garage-stats div {
+    padding: 9px 7px;
+    background: #181c22;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.garage-stats span {
+    display: block;
+    color: #8993a0;
+    font-size: 10px;
+}
+
+.garage-stats b {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+}
+
+/* =========================
+   Заказ
+========================= */
+
+.car-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #181c22;
+    border-radius: 12px;
+}
+
+.car-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    flex-shrink: 0;
+    background: #292f38;
+    border-radius: 12px;
+    font-size: 31px;
+}
+
+.car-info h3 {
+    margin: 0 0 5px;
+    font-size: 17px;
+}
+
+.car-info p {
+    margin: 0;
+    color: #9da6b2;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.customer-message {
+    margin-top: 10px;
+    padding: 12px;
+    background: #242a32;
+    border-left: 3px solid #687381;
+    border-radius: 9px;
+}
+
+.customer-message span {
+    color: #c2c9d1;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.customer-message p {
+    margin: 7px 0 0;
+    color: #aeb6c1;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* =========================
+   Кнопки
+========================= */
+
+.main-button,
+.action-button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 13px 15px;
+    border: 0;
+    border-radius: 11px;
+    background: #3b82f6;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.12s, opacity 0.12s;
+}
+
+.main-button:active,
+.action-button:active,
+.menu-button:active {
+    transform: scale(0.98);
+}
+
+.main-button:hover,
+.action-button:hover {
+    opacity: 0.9;
+}
+
+.main-button:disabled,
+.action-button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+/* =========================
+   Меню
+========================= */
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 9px;
+    padding-bottom: 18px;
+}
+
+.menu-button {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: 105px;
+    padding: 13px;
+    border: 1px solid #303640;
+    border-radius: 14px;
+    background: #20252d;
+    color: #f2f4f7;
+    text-align: left;
+    cursor: pointer;
+}
+
+.menu-button > span {
+    margin-bottom: 8px;
+    font-size: 25px;
+}
+
+.menu-button b {
+    font-size: 14px;
+}
+
+.menu-button small {
+    margin-top: 4px;
+    color: #8993a0;
+    font-size: 11px;
+}
+
+/* =========================
+   Модальное окно
+========================= */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.65);
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-window {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 20px;
+    border: 1px solid #363e49;
+    border-radius: 20px 20px 12px 12px;
+    background: #20252d;
+    box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.35);
+}
+
+.modal-window h2 {
+    margin: 0 0 15px;
+    font-size: 20px;
+}
+
+.modal-window p {
+    color: #aeb6c1;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: #303640;
+    color: #dfe4ea;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+/* =========================
+   Диагностика
+========================= */
+
+.diagnosis-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.diagnosis-button {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #3a424e;
+    border-radius: 11px;
+    background: #181c22;
+    color: #f2f4f7;
+    text-align: left;
+    cursor: pointer;
+}
+
+.diagnosis-button:hover {
+    background: #292f38;
+}
+
+.diagnosis-result {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 11px;
+    background: #181c22;
+    color: #b8c0ca;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* =========================
+   Строки характеристик
+========================= */
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid #303640;
+    font-size: 13px;
+}
+
+.stat-row:last-child {
+    border-bottom: 0;
+}
+
+.stat-row span {
+    color: #9da6b2;
+}
+
+.stat-row b {
+    color: #f2f4f7;
+}
+
+/* =========================
+   Уведомления
+========================= */
+
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 20px;
+    z-index: 200;
+    transform: translate(-50%, 20px);
+    width: calc(100% - 30px);
+    max-width: 480px;
+    padding: 12px 15px;
+    border: 1px solid #3b424d;
+    border-radius: 11px;
+    background: #252b33;
+    color: #f2f4f7;
+    text-align: center;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.2s;
+}
+
+.toast.show {
+    transform: translate(-50%, 0);
+    opacity: 1;
+}
+
+/* =========================
+   Маленькие экраны
+========================= */
+
+@media (max-width: 370px) {
+
+    .stats {
+        gap: 5px;
+        padding: 8px;
+    }
+
+    .stat {
+        padding: 8px 5px;
+    }
+
+    .stat > span {
+        font-size: 17px;
+    }
+
+    .stat b {
+        font-size: 11px;
+    }
+
+    .garage-stats {
+        grid-template-columns: 1fr;
+    }
+}
