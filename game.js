@@ -1,926 +1,770 @@
-const K = "life_v02";
+const SAVE_KEY = "auto_service_v01";
 
-let s = JSON.parse(localStorage.getItem(K) || "null") || {
-    name: "Влад",
+const state = JSON.parse(localStorage.getItem(SAVE_KEY) || "null") || {
+    money: 15000,
+    reputation: 0,
     level: 1,
     xp: 0,
-    money: 1000,
-    energy: 100,
-    health: 80,
-    rep: 0,
-    age: 18,
-    car: "Нет",
-    home: "Комната",
-    career: 0,
-    intelligence: 20,
-    form: 50,
-    job: "Безработный",
-    education: "Нет",
-    educationLevel: 0
+
+    garage: {
+        level: 1,
+        posts: 1
+    },
+
+    currentOrder: {
+        car: "Kia Rio",
+        complaint: "Машина плохо заводится утром",
+        diagnosis: null,
+        repair: null,
+        agreed: false,
+        completed: false
+    }
 };
 
-/* Совместимость со старым сохранением */
-s.career = s.career ?? 0;
-s.intelligence = s.intelligence ?? 20;
-s.form = s.form ?? 50;
-s.job = s.job ?? "Безработный";
-s.education = s.education ?? "Нет";
-s.educationLevel = s.educationLevel ?? 0;
-
-const $ = x => document.getElementById(x);
-
-const need = () => 100 + (s.level - 1) * 60;
+const $ = id => document.getElementById(id);
 
 function save() {
-    localStorage.setItem(K, JSON.stringify(s));
+    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+}
+
+function xpNeeded() {
+    return 100 + (state.level - 1) * 50;
+}
+
+function addXP(amount) {
+    state.xp += amount;
+
+    while (state.xp >= xpNeeded()) {
+        state.xp -= xpNeeded();
+        state.level++;
+
+        state.reputation += 5;
+
+        showToast(
+            `🎉 Новый уровень механика: ${state.level}`
+        );
+    }
+}
+
+function addMoney(amount) {
+    state.money += amount;
+}
+
+function addReputation(amount) {
+    state.reputation = Math.max(
+        0,
+        state.reputation + amount
+    );
 }
 
 function render() {
-
-    $("name").textContent = s.name;
-    $("level").textContent = s.level;
-
     $("money").textContent =
-        new Intl.NumberFormat("ru-RU").format(s.money) + " ₽";
+        new Intl.NumberFormat("ru-RU").format(state.money) + " ₽";
 
-    $("energy").textContent = s.energy;
-    $("health").textContent = s.health;
-    $("rep").textContent = s.rep;
+    $("reputation").textContent =
+        state.reputation;
 
-    $("xp").style.width =
-        Math.min(100, s.xp / need() * 100) + "%";
+    $("xp").textContent =
+        `${state.xp} / ${xpNeeded()}`;
 
-    $("goals").innerHTML = `
+    $("level").textContent =
+        state.level;
 
-        <div class="goal">
-            <span>💰 Накопить 10 000 ₽</span>
-            <b>${Math.min(100, Math.floor(s.money / 100))}%</b>
-        </div>
-
-        <div class="goal">
-            <span>💼 Найти первую работу</span>
-            <b>${s.job !== "Безработный" ? "✓" : "○"}</b>
-        </div>
-
-        <div class="goal">
-            <span>🚗 Купить автомобиль</span>
-            <b>${s.car === "Нет" ? "○" : "✓"}</b>
-        </div>
-
-        <div class="goal">
-            <span>🏠 Улучшить жильё</span>
-            <b>${s.home === "Комната" ? "○" : "✓"}</b>
-        </div>
-
-    `;
+    updateOrder();
 }
 
-/* =========================
-   ОПЫТ И УРОВНИ
-========================= */
+function updateOrder() {
+    if (!state.currentOrder.completed) {
+        $("carName").textContent =
+            state.currentOrder.car;
 
-function xp(n) {
-
-    s.xp += n;
-
-    while (s.xp >= need()) {
-
-        s.xp -= need();
-
-        s.level++;
-
-        s.money += 500;
-
-        s.rep += 2;
-
-        toast(
-            "🎉 Новый уровень! +500 ₽ и +2 ⭐ репутации"
-        );
+        $("carProblem").textContent =
+            `«${state.currentOrder.complaint}»`;
     }
 }
 
-/* =========================
-   ОТКРЫТИЕ ЗДАНИЙ
-========================= */
-
-function open(place) {
-
-    let title = "";
-    let body = "";
-
-    /* =========================
-       РАБОТА
-    ========================= */
-
-    if (place === "work") {
-
-        title = "💼 Работа";
-
-        body = `
-
-            <p>
-                Твоя текущая работа:
-                <b>${s.job}</b>
-            </p>
-
-            <div class="statrow">
-                <span>💼 Карьера</span>
-                <b>${s.career}/100</b>
-            </div>
-
-            <div class="statrow">
-                <span>🧠 Интеллект</span>
-                <b>${s.intelligence}/100</b>
-            </div>
-
-            <hr>
-
-            <h3>Доступные вакансии</h3>
-
-            ${jobButton(
-                "courier",
-                "🛵 Курьер",
-                250,
-                20,
-                0,
-                0
-            )}
-
-            ${jobButton(
-                "seller",
-                "🛍️ Продавец",
-                450,
-                20,
-                25,
-                10
-            )}
-
-            ${jobButton(
-                "manager",
-                "💼 Менеджер",
-                750,
-                25,
-                40,
-                30
-            )}
-
-            ${jobButton(
-                "programmer",
-                "👨‍💻 Программист",
-                1200,
-                30,
-                60,
-                60
-            )}
-
-        `;
-    }
-
-    /* =========================
-       УНИВЕРСИТЕТ
-    ========================= */
-
-    if (place === "study") {
-
-        title = "🎓 Университет";
-
-        body = `
-
-            <p>
-                Выбери направление обучения.
-                Учёба повышает интеллект,
-                карьеру и уровень образования.
-            </p>
-
-            <div class="statrow">
-                <span>🎓 Образование</span>
-                <b>${s.education}</b>
-            </div>
-
-            <div class="statrow">
-                <span>📚 Уровень образования</span>
-                <b>${s.educationLevel}/100</b>
-            </div>
-
-            <hr>
-
-            <button class="actionBtn"
-                onclick="study('it')">
-
-                💻 IT
-
-                <br>
-
-                <small>
-                    +8 интеллект · +2 карьера · −15 энергии
-                </small>
-
-            </button>
-
-            <button class="actionBtn"
-                onclick="study('business')">
-
-                📊 Бизнес
-
-                <br>
-
-                <small>
-                    +6 интеллект · +5 карьера · −15 энергии
-                </small>
-
-            </button>
-
-            <button class="actionBtn"
-                onclick="study('engineering')">
-
-                ⚙️ Инженерия
-
-                <br>
-
-                <small>
-                    +7 интеллект · +4 карьера · −15 энергии
-                </small>
-
-            </button>
-
-        `;
-    }
-
-    /* =========================
-       ФИТНЕС
-    ========================= */
-
-    if (place === "gym") {
-
-        title = "🏋️ Фитнес";
-
-        body = `
-
-            <p>
-                Тренировки повышают форму
-                и здоровье.
-            </p>
-
-            <div class="statrow">
-                <span>💪 Форма</span>
-                <b>${s.form}/100</b>
-            </div>
-
-            <div class="statrow">
-                <span>❤️ Здоровье</span>
-                <b>${s.health}/100</b>
-            </div>
-
-            <button class="actionBtn"
-                onclick="gym()">
-
-                Тренироваться · −10 энергии
-
-            </button>
-
-        `;
-    }
-
-    /* =========================
-       КВАРТИРА
-    ========================= */
-
-    if (place === "home") {
-
-        title = "🏠 Квартира";
-
-        body = `
-
-            <p>
-                Сейчас у тебя:
-                <b>${s.home}</b>
-            </p>
-
-            <button class="actionBtn"
-                onclick="rest()">
-
-                😴 Отдохнуть · +35 энергии
-
-            </button>
-
-        `;
-    }
-
-    /* =========================
-       АВТОСАЛОН
-    ========================= */
-
-    if (place === "auto") {
-
-        title = "🚗 Автосалон";
-
-        body = `
-
-            <p>
-                Твоя машина:
-                <b>${s.car}</b>
-            </p>
-
-            <button class="actionBtn"
-                onclick="buyCar()">
-
-                🚗 Купить первую машину · 5 000 ₽
-
-            </button>
-
-        `;
-    }
-
-    /* =========================
-       МАГАЗИН
-    ========================= */
-
-    if (place === "shop") {
-
-        title = "🛒 Магазин";
-
-        body = `
-
-            <p>
-                Здесь позже появятся одежда,
-                предметы и премиальные привилегии.
-            </p>
-
-            <button class="actionBtn"
-                onclick="toast('Скоро здесь будет магазин')">
-
-                Открыть магазин
-
-            </button>
-
-        `;
-    }
-
-    $("modalContent").innerHTML =
-        `<h2>${title}</h2>${body}`;
-
+function openModal(html) {
+    $("modalContent").innerHTML = html;
     $("modal").classList.add("show");
 }
 
-/* =========================
-   ВАКАНСИИ
-========================= */
-
-function jobButton(
-    type,
-    name,
-    salary,
-    energy,
-    intelligence,
-    career
-) {
-
-    const unlocked =
-        s.intelligence >= intelligence &&
-        s.career >= career;
-
-    if (unlocked) {
-
-        return `
-
-            <button class="actionBtn"
-                onclick="work('${type}')">
-
-                ${name} · ${salary.toLocaleString("ru-RU")} ₽
-
-                <br>
-
-                <small>
-                    −${energy} энергии
-                </small>
-
-            </button>
-
-        `;
-    }
-
-    let requirements = [];
-
-    if (s.intelligence < intelligence) {
-
-        requirements.push(
-            `🧠 интеллект ${intelligence}`
-        );
-    }
-
-    if (s.career < career) {
-
-        requirements.push(
-            `💼 карьера ${career}`
-        );
-    }
-
-    return `
-
-        <button class="actionBtn"
-            style="opacity:.45"
-            onclick="lockedJob('${requirements.join(" · ")}')">
-
-            🔒 ${name} · ${salary.toLocaleString("ru-RU")} ₽
-
-            <br>
-
-            <small>
-                ${requirements.join(" · ")}
-            </small>
-
-        </button>
-
-    `;
-}
-
-function lockedJob(requirements) {
-
-    toast(
-        "🔒 Пока недоступно: " + requirements
-    );
-}
-
-/* =========================
-   ЭНЕРГИЯ
-========================= */
-
-function spend(n) {
-
-    if (s.energy < n) {
-
-        toast("⚡ Не хватает энергии");
-
-        return false;
-    }
-
-    s.energy -= n;
-
-    return true;
-}
-
-/* =========================
-   РАБОТА
-========================= */
-
-function work(type) {
-
-    const jobs = {
-
-        courier: {
-
-            name: "Курьер",
-            money: 250,
-            energy: 20,
-            career: 3,
-            xp: 15
-
-        },
-
-        seller: {
-
-            name: "Продавец",
-            money: 450,
-            energy: 20,
-            career: 5,
-            xp: 20,
-            intelligence: 25,
-            requiredCareer: 10
-
-        },
-
-        manager: {
-
-            name: "Менеджер",
-            money: 750,
-            energy: 25,
-            career: 8,
-            xp: 30,
-            intelligence: 40,
-            requiredCareer: 30
-
-        },
-
-        programmer: {
-
-            name: "Программист",
-            money: 1200,
-            energy: 30,
-            career: 12,
-            xp: 45,
-            intelligence: 60,
-            requiredCareer: 60
-
-        }
-
-    };
-
-    const job = jobs[type];
-
-    if (!job) return;
-
-    if (
-        job.intelligence &&
-        s.intelligence < job.intelligence
-    ) {
-
-        toast(
-            `🧠 Нужно ${job.intelligence} интеллекта`
-        );
-
-        return;
-    }
-
-    if (
-        job.requiredCareer &&
-        s.career < job.requiredCareer
-    ) {
-
-        toast(
-            `💼 Нужно ${job.requiredCareer} карьеры`
-        );
-
-        return;
-    }
-
-    if (!spend(job.energy)) return;
-
-    s.job = job.name;
-
-    s.money += job.money;
-
-    s.career = Math.min(
-        100,
-        s.career + job.career
-    );
-
-    xp(job.xp);
-
-    close();
-
-    render();
-
-    save();
-
-    toast(
-        `💼 ${job.name}: +${job.money} ₽`
-    );
-}
-
-/* =========================
-   УНИВЕРСИТЕТ
-========================= */
-
-function study(type) {
-
-    const courses = {
-
-        it: {
-
-            name: "💻 IT",
-            intelligence: 8,
-            career: 2,
-            xp: 30
-
-        },
-
-        business: {
-
-            name: "📊 Бизнес",
-            intelligence: 6,
-            career: 5,
-            xp: 30
-
-        },
-
-        engineering: {
-
-            name: "⚙️ Инженерия",
-            intelligence: 7,
-            career: 4,
-            xp: 30
-
-        }
-
-    };
-
-    const course = courses[type];
-
-    if (!course) return;
-
-    if (!spend(15)) return;
-
-    s.education = course.name;
-
-    s.educationLevel = Math.min(
-        100,
-        s.educationLevel + 10
-    );
-
-    s.intelligence = Math.min(
-        100,
-        s.intelligence + course.intelligence
-    );
-
-    s.career = Math.min(
-        100,
-        s.career + course.career
-    );
-
-    xp(course.xp);
-
-    close();
-
-    render();
-
-    save();
-
-    toast(
-        `${course.name}: образование улучшено`
-    );
-}
-
-/* =========================
-   ФИТНЕС
-========================= */
-
-function gym() {
-
-    if (!spend(10)) return;
-
-    s.health = Math.min(
-        100,
-        s.health + 12
-    );
-
-    s.form = Math.min(
-        100,
-        s.form + 5
-    );
-
-    xp(10);
-
-    close();
-
-    render();
-
-    save();
-
-    toast(
-        "💪 +5 формы · +12 здоровья"
-    );
-}
-
-/* =========================
-   ОТДЫХ
-========================= */
-
-function rest() {
-
-    s.energy = Math.min(
-        100,
-        s.energy + 35
-    );
-
-    s.health = Math.min(
-        100,
-        s.health + 5
-    );
-
-    close();
-
-    render();
-
-    save();
-
-    toast(
-        "😴 Отдых помог"
-    );
-}
-
-/* =========================
-   АВТОМОБИЛЬ
-========================= */
-
-function buyCar() {
-
-    if (s.car !== "Нет") {
-
-        toast(
-            "🚗 Машина уже есть"
-        );
-
-        return;
-    }
-
-    if (s.money < 5000) {
-
-        toast(
-            "💰 Нужно 5 000 ₽"
-        );
-
-        return;
-    }
-
-    s.money -= 5000;
-
-    s.car = "Первая машина";
-
-    close();
-
-    render();
-
-    save();
-
-    toast(
-        "🚗 Машина куплена!"
-    );
-}
-
-/* =========================
-   ЗАКРЫТИЕ ОКНА
-========================= */
-
-function close() {
-
+function closeModal() {
     $("modal").classList.remove("show");
 }
 
-function toast(t) {
+function showToast(text) {
+    const toast = $("toast");
 
-    alert(t);
+    toast.textContent = text;
+    toast.classList.add("show");
+
+    clearTimeout(window.toastTimer);
+
+    window.toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+    }, 2200);
 }
 
 /* =========================
-   ЗДАНИЯ ГОРОДА
+   ДИАГНОСТИКА
 ========================= */
 
-document
-    .querySelectorAll(".building")
-    .forEach(b => {
+function startDiagnosis() {
 
-        b.onclick = () =>
-            open(b.dataset.place);
-
-    });
-
-/* =========================
-   КНОПКА ЗАКРЫТИЯ
-========================= */
-
-$("close").onclick = close;
-
-/* =========================
-   СБРОС
-========================= */
-
-$("reset").onclick = () => {
-
-    if (confirm("Начать заново?")) {
-
-        localStorage.removeItem(K);
-
-        location.reload();
-
+    if (state.currentOrder.completed) {
+        showToast("Этот заказ уже завершён");
+        return;
     }
-};
 
-/* =========================
-   ГЕРОЙ
-========================= */
-
-$("hero").onclick = () => {
-
-    $("modalContent").innerHTML = `
-
-        <h2>👤 Герой</h2>
-
-        <div class="statrow">
-            <span>Возраст</span>
-            <b>${s.age} лет</b>
-        </div>
-
-        <div class="statrow">
-            <span>Уровень</span>
-            <b>${s.level}</b>
-        </div>
-
-        <div class="statrow">
-            <span>💼 Работа</span>
-            <b>${s.job}</b>
-        </div>
-
-        <div class="statrow">
-            <span>💼 Карьера</span>
-            <b>${s.career}/100</b>
-        </div>
-
-        <div class="statrow">
-            <span>🎓 Образование</span>
-            <b>${s.education}</b>
-        </div>
-
-        <div class="statrow">
-            <span>📚 Уровень образования</span>
-            <b>${s.educationLevel}/100</b>
-        </div>
-
-        <div class="statrow">
-            <span>🧠 Интеллект</span>
-            <b>${s.intelligence}/100</b>
-        </div>
-
-        <div class="statrow">
-            <span>💪 Форма</span>
-            <b>${s.form}/100</b>
-        </div>
-
-        <div class="statrow">
-            <span>❤️ Здоровье</span>
-            <b>${s.health}/100</b>
-        </div>
-
-        <div class="statrow">
-            <span>⭐ Репутация</span>
-            <b>${s.rep}</b>
-        </div>
-
-    `;
-
-    $("modal").classList.add("show");
-};
-
-/* =========================
-   ИМУЩЕСТВО
-========================= */
-
-$("items").onclick = () => {
-
-    $("modalContent").innerHTML = `
-
-        <h2>🎒 Имущество</h2>
-
-        <div class="statrow">
-            <span>🏠 Жильё</span>
-            <b>${s.home}</b>
-        </div>
-
-        <div class="statrow">
-            <span>🚗 Автомобиль</span>
-            <b>${s.car}</b>
-        </div>
-
-        <div class="statrow">
-            <span>🎓 Образование</span>
-            <b>${s.education}</b>
-        </div>
-
-    `;
-
-    $("modal").classList.add("show");
-};
-
-/* =========================
-   МАГАЗИН
-========================= */
-
-$("shop").onclick = () =>
-    open("shop");
-
-/* =========================
-   РЕЙТИНГ
-========================= */
-
-$("rating").onclick = () => {
-
-    $("modalContent").innerHTML = `
-
-        <h2>🏆 Рейтинг</h2>
+    openModal(`
+        <h2>🔍 Диагностика</h2>
 
         <p>
-            Скоро здесь появится рейтинг игроков VK.
+            Клиент сообщает, что автомобиль утром
+            заводится тяжело и стартер приходится
+            долго крутить.
         </p>
 
-    `;
+        <p>
+            Проведи несколько проверок.
+            Собирай информацию перед тем,
+            как принимать решение о ремонте.
+        </p>
 
-    $("modal").classList.add("show");
+        <div class="diagnosis-list">
+
+            <button class="diagnosis-button"
+                onclick="checkBattery()">
+                🔋 Проверить аккумулятор
+            </button>
+
+            <button class="diagnosis-button"
+                onclick="checkSpark()">
+                🔥 Проверить свечи
+            </button>
+
+            <button class="diagnosis-button"
+                onclick="checkStarter()">
+                ⚡ Проверить стартер
+            </button>
+
+            <button class="diagnosis-button"
+                onclick="checkFuel()">
+                ⛽ Проверить топливную систему
+            </button>
+
+        </div>
+
+        <div id="diagnosisResult"></div>
+
+        <button
+            class="action-button"
+            onclick="openAnalysis()">
+            🧠 Перейти к анализу
+        </button>
+    `);
+}
+
+let diagnosisData = {
+    battery: false,
+    spark: false,
+    starter: false,
+    fuel: false
 };
 
+function setDiagnosisResult(text) {
+
+    $("diagnosisResult").innerHTML = `
+        <div class="diagnosis-result">
+            ${text}
+        </div>
+    `;
+}
+
+function checkBattery() {
+
+    diagnosisData.battery = true;
+
+    setDiagnosisResult(`
+        🔋 <b>Аккумулятор:</b><br>
+        Напряжение после простоя — 12.6 В.<br><br>
+
+        Это нормальное значение.
+        Аккумулятор пока не выглядит основной причиной
+        проблемы.
+    `);
+}
+
+function checkSpark() {
+
+    diagnosisData.spark = true;
+
+    setDiagnosisResult(`
+        🔥 <b>Свечи зажигания:</b><br>
+        Одна из свечей имеет заметный износ.<br><br>
+
+        Это уже подозрительный результат.
+        Но одной проверки недостаточно,
+        чтобы окончательно определить причину.
+    `);
+}
+
+function checkStarter() {
+
+    diagnosisData.starter = true;
+
+    setDiagnosisResult(`
+        ⚡ <b>Стартер:</b><br>
+        Стартер вращает двигатель нормально.<br><br>
+
+        Признаков серьёзной неисправности
+        стартера не обнаружено.
+    `);
+}
+
+function checkFuel() {
+
+    diagnosisData.fuel = true;
+
+    setDiagnosisResult(`
+        ⛽ <b>Топливная система:</b><br>
+        Давление топлива находится
+        в допустимом диапазоне.<br><br>
+
+        Явных признаков неисправности
+        топливной системы нет.
+    `);
+}
+
 /* =========================
-   ЗАКРЫТИЕ ПО ФОНУ
+   АНАЛИЗ
 ========================= */
 
-$("modal").onclick = e => {
+function openAnalysis() {
 
-    if (e.target.id === "modal") {
+    if (
+        !diagnosisData.battery &&
+        !diagnosisData.spark &&
+        !diagnosisData.starter &&
+        !diagnosisData.fuel
+    ) {
+        showToast("Сначала проведи хотя бы одну проверку");
+        return;
+    }
 
-        close();
+    openModal(`
+        <h2>🧠 Анализ</h2>
 
+        <p>
+            Теперь сопоставь жалобу клиента
+            с результатами диагностики.
+        </p>
+
+        <p>
+            Машина плохо заводится.
+            Стартер вращает двигатель нормально,
+            аккумулятор исправен,
+            топливное давление в норме,
+            но свечи имеют признаки износа.
+        </p>
+
+        <p>
+            Что считаешь наиболее вероятной причиной?
+        </p>
+
+        <div class="diagnosis-list">
+
+            <button class="diagnosis-button"
+                onclick="chooseDiagnosis('spark')">
+                🔥 Износ свечей зажигания
+            </button>
+
+            <button class="diagnosis-button"
+                onclick="chooseDiagnosis('battery')">
+                🔋 Неисправность аккумулятора
+            </button>
+
+            <button class="diagnosis-button"
+                onclick="chooseDiagnosis('starter')">
+                ⚡ Неисправность стартера
+            </button>
+
+            <button class="diagnosis-button"
+                onclick="chooseDiagnosis('fuel')">
+                ⛽ Неисправность топливной системы
+            </button>
+
+        </div>
+    `);
+}
+
+function chooseDiagnosis(type) {
+
+    if (type !== "spark") {
+
+        addReputation(-3);
+
+        openModal(`
+            <h2>❌ Диагноз оказался неверным</h2>
+
+            <p>
+                Ты выбрал неисправность, которая
+                не подтверждается результатами проверки.
+            </p>
+
+            <p>
+                Хороший механик не должен менять детали
+                наугад — сначала нужно подтвердить причину.
+            </p>
+
+            <div class="diagnosis-result">
+                ⭐ Репутация: −3
+            </div>
+
+            <button class="action-button"
+                onclick="startDiagnosis()">
+                🔍 Вернуться к диагностике
+            </button>
+        `);
+
+        save();
+        render();
+
+        return;
+    }
+
+    state.currentOrder.diagnosis =
+        "Износ свечей зажигания";
+
+    addXP(20);
+
+    openRepairAgreement();
+}
+
+/* =========================
+   СОГЛАСОВАНИЕ РЕМОНТА
+========================= */
+
+function openRepairAgreement() {
+
+    const partCost = 2500;
+    const workCost = 1000;
+    const costPrice = partCost + workCost;
+
+    openModal(`
+        <h2>📋 Предложение клиенту</h2>
+
+        <div class="stat-row">
+            <span>🔩 Свечи зажигания</span>
+            <b>2 500 ₽</b>
+        </div>
+
+        <div class="stat-row">
+            <span>🔧 Работа</span>
+            <b>1 000 ₽</b>
+        </div>
+
+        <div class="stat-row">
+            <span>💰 Себестоимость</span>
+            <b>${costPrice.toLocaleString("ru-RU")} ₽</b>
+        </div>
+
+        <p>
+            Теперь сам установи цену ремонта.
+            Клиент не видит твою себестоимость.
+        </p>
+
+        <label>
+            <b>Цена для клиента:</b>
+        </label>
+
+        <input
+            id="repairPrice"
+            type="number"
+            value="4500"
+            min="2500"
+            step="100"
+            style="
+                width:100%;
+                margin-top:8px;
+                padding:12px;
+                border-radius:10px;
+                border:1px solid #3a424e;
+                background:#181c22;
+                color:white;
+                font-size:16px;
+            "
+        >
+
+        <div class="diagnosis-result">
+            💡 Чем выше цена, тем больше потенциальная
+            прибыль, но тем выше вероятность отказа клиента.
+        </div>
+
+        <button class="action-button"
+            onclick="offerRepair()">
+            🤝 Предложить клиенту
+        </button>
+    `);
+}
+
+function offerRepair() {
+
+    const input = $("repairPrice");
+
+    const price =
+        Number(input.value);
+
+    const costPrice = 3500;
+
+    if (!price || price < costPrice) {
+
+        showToast(
+            "Цена не может быть ниже себестоимости"
+        );
+
+        return;
+    }
+
+    state.currentOrder.repair = {
+        price: price,
+        cost: costPrice
+    };
+
+    /*
+        Простая вероятность согласия.
+
+        Чем выше наценка,
+        тем меньше вероятность.
+    */
+
+    const markup =
+        (price - costPrice) / costPrice;
+
+    let chance = 0.92 - markup * 0.8;
+
+    chance = Math.max(
+        0.20,
+        Math.min(0.95, chance)
+    );
+
+    const accepted =
+        Math.random() < chance;
+
+    if (!accepted) {
+
+        openModal(`
+            <h2>❌ Клиент отказался</h2>
+
+            <p>
+                Клиент считает ремонт слишком дорогим.
+            </p>
+
+            <div class="diagnosis-result">
+                💰 Диагностика оплачена: <b>800 ₽</b>
+            </div>
+
+            <p>
+                Ты всё равно получил оплату
+                за проделанную диагностическую работу.
+            </p>
+
+            <button class="action-button"
+                onclick="finishDiagnosisOnly()">
+                Завершить заказ
+            </button>
+        `);
+
+        return;
+    }
+
+    state.currentOrder.agreed = true;
+
+    openRepairConfirmation(price);
+}
+
+/* =========================
+   РЕМОНТ
+========================= */
+
+function openRepairConfirmation(price) {
+
+    const profit =
+        price - state.currentOrder.repair.cost;
+
+    openModal(`
+        <h2>✅ Клиент согласен</h2>
+
+        <div class="stat-row">
+            <span>Стоимость ремонта</span>
+            <b>${price.toLocaleString("ru-RU")} ₽</b>
+        </div>
+
+        <div class="stat-row">
+            <span>Твоя прибыль</span>
+            <b>${profit.toLocaleString("ru-RU")} ₽</b>
+        </div>
+
+        <p>
+            Клиент оставляет автомобиль
+            в гараже. Можно начинать ремонт.
+        </p>
+
+        <button class="action-button"
+            onclick="performRepair()">
+            🔧 Выполнить ремонт
+        </button>
+    `);
+}
+
+function performRepair() {
+
+    const price =
+        state.currentOrder.repair.price;
+
+    const cost =
+        state.currentOrder.repair.cost;
+
+    const profit =
+        price - cost;
+
+    addMoney(profit);
+
+    addMoney(800);
+
+    addXP(30);
+
+    addReputation(8);
+
+    state.currentOrder.completed = true;
+
+    save();
+    render();
+
+    openModal(`
+        <h2>🧪 Ремонт завершён</h2>
+
+        <p>
+            Свечи зажигания заменены.
+            Двигатель запускается нормально.
+        </p>
+
+        <div class="stat-row">
+            <span>💰 Диагностика</span>
+            <b>+800 ₽</b>
+        </div>
+
+        <div class="stat-row">
+            <span>💵 Прибыль с ремонта</span>
+            <b>+${profit.toLocaleString("ru-RU")} ₽</b>
+        </div>
+
+        <div class="stat-row">
+            <span>⭐ Репутация</span>
+            <b>+8</b>
+        </div>
+
+        <div class="stat-row">
+            <span>📈 Опыт</span>
+            <b>+30 XP</b>
+        </div>
+
+        <div class="diagnosis-result">
+            🧠 <b>Что ты узнал:</b><br><br>
+
+            Если автомобиль плохо заводится,
+            не стоит сразу менять аккумулятор.
+            Нужно последовательно проверить
+            основные системы запуска двигателя
+            и сопоставить результаты диагностики
+            с симптомами.
+        </div>
+
+        <button class="action-button"
+            onclick="closeModal()">
+            🔧 Вернуться в гараж
+        </button>
+    `);
+}
+
+function finishDiagnosisOnly() {
+
+    addMoney(800);
+    addXP(15);
+
+    state.currentOrder.completed = true;
+
+    save();
+    render();
+
+    openModal(`
+        <h2>📋 Заказ завершён</h2>
+
+        <p>
+            Клиент отказался от ремонта,
+            но оплатил диагностику.
+        </p>
+
+        <div class="stat-row">
+            <span>💰 Диагностика</span>
+            <b>+800 ₽</b>
+        </div>
+
+        <div class="stat-row">
+            <span>📈 Опыт</span>
+            <b>+15 XP</b>
+        </div>
+
+        <button class="action-button"
+            onclick="closeModal()">
+            🔧 Вернуться в гараж
+        </button>
+    `);
+}
+
+/* =========================
+   ОБУЧЕНИЕ
+========================= */
+
+function openTraining() {
+
+    openModal(`
+        <h2>📚 Обучение</h2>
+
+        <p>
+            Здесь постепенно появится полноценная
+            школа автомеханика.
+        </p>
+
+        <div class="stat-row">
+            <span>🔋 Электрика</span>
+            <b>Скоро</b>
+        </div>
+
+        <div class="stat-row">
+            <span>🔥 Двигатель</span>
+            <b>Скоро</b>
+        </div>
+
+        <div class="stat-row">
+            <span>⚙️ Трансмиссия</span>
+            <b>Скоро</b>
+        </div>
+
+        <div class="stat-row">
+            <span>🚗 Подвеска</span>
+            <b>Скоро</b>
+        </div>
+    `);
+}
+
+/* =========================
+   ИНСТРУМЕНТЫ
+========================= */
+
+function openTools() {
+
+    openModal(`
+        <h2>🧰 Инструменты</h2>
+
+        <div class="stat-row">
+            <span>🔧 Набор ключей</span>
+            <b>Есть</b>
+        </div>
+
+        <div class="stat-row">
+            <span>🔋 Мультиметр</span>
+            <b>Не куплен</b>
+        </div>
+
+        <div class="stat-row">
+            <span>💻 OBD-сканер</span>
+            <b>Не куплен</b>
+        </div>
+
+        <p>
+            Новое оборудование будет открываться
+            по мере развития гаража.
+        </p>
+    `);
+}
+
+/* =========================
+   АВТОМОБИЛИ
+========================= */
+
+function openCars() {
+
+    openModal(`
+        <h2>🚘 Автомобили</h2>
+
+        <p>
+            Позже здесь появится собственный автопарк.
+        </p>
+
+        <div class="stat-row">
+            <span>🚗 Собственные автомобили</span>
+            <b>0</b>
+        </div>
+    `);
+}
+
+/* =========================
+   СТО
+========================= */
+
+function openService() {
+
+    openModal(`
+        <h2>🏢 СТО</h2>
+
+        <div class="stat-row">
+            <span>Уровень мастерской</span>
+            <b>1</b>
+        </div>
+
+        <div class="stat-row">
+            <span>Рабочие посты</span>
+            <b>1</b>
+        </div>
+
+        <p>
+            В будущем здесь можно будет расширять
+            помещение, покупать подъёмники,
+            нанимать механиков и превращать
+            гараж в полноценный автотехцентр.
+        </p>
+    `);
+}
+
+/* =========================
+   СОБЫТИЯ
+========================= */
+
+$("startDiagnosis").onclick =
+    startDiagnosis;
+
+$("trainingButton").onclick =
+    openTraining;
+
+$("toolsButton").onclick =
+    openTools;
+
+$("carsButton").onclick =
+    openCars;
+
+$("serviceButton").onclick =
+    openService;
+
+$("closeModal").onclick =
+    closeModal;
+
+$("modal").onclick = event => {
+
+    if (event.target.id === "modal") {
+        closeModal();
     }
 };
 
-/* =========================
-   ЗАПУСК
-========================= */
-
 render();
+save();
