@@ -1,104 +1,186 @@
-<!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101722"><title>Жизнь: Новый старт</title><link rel="stylesheet" href="style.css"></head>
-<body><main class="app">
-<header><div><div class="eyebrow">ЖИЗНЬ: НОВЫЙ СТАРТ</div><h1 id="name">Влад</h1></div><button id="reset">↻</button></header>
-<section class="hud"><div class="avatar">🙂</div><div class="bars"><b>Уровень <span id="level">1</span></b><div class="xp"><i id="xp"></i></div><div class="nums">💰 <strong id="money">1 000 ₽</strong> · ⚡ <strong id="energy">100</strong> · ❤️ <strong id="health">80</strong> · ⭐ <strong id="rep">0</strong></div></div></section>
-<section class="city"><div class="sky">🏙️ <span>МОЙ ГОРОД</span></div>
-<div class="road r1"></div><div class="road r2"></div>
-<button class="building b-home" data-place="home"><span>🏠</span><b>Квартира</b><small>Отдых и жильё</small></button>
-<button class="building b-work" data-place="work"><span>💼</span><b>Работа</b><small>Заработать деньги</small></button>
-<button class="building b-study" data-place="study"><span>🎓</span><b>Университет</b><small>Получить навыки</small></button>
-<button class="building b-gym" data-place="gym"><span>🏋️</span><b>Фитнес</b><small>Здоровье</small></button>
-<button class="building b-auto" data-place="auto"><span>🚗</span><b>Автосалон</b><small>Машины</small></button>
-<button class="building b-shop" data-place="shop"><span>🛒</span><b>Магазин</b><small>Привилегии</small></button>
-</section>
-<section class="goals"><div class="title">🎯 Цели</div><div id="goals"></div></section>
-<nav><button class="active">🏙️<small>Город</small></button><button id="hero">👤<small>Герой</small></button><button id="items">🎒<small>Имущество</small></button><button id="shop">🛒<small>Магазин</small></button><button id="rating">🏆<small>Рейтинг</small></button></nav>
-<div class="modal" id="modal"><div class="modalBox"><button class="close" id="close">×</button><div id="modalContent"></div></div></div>
-<footer>Версия 0.2 · Город</footer>
 
-<script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Автосервис: С нуля</title>
+    <link rel="stylesheet" href="style.css">
+</head>
 
-<script>
-  if (window.vkBridge) {
-    vkBridge.send('VKWebAppInit')
-      .then(() => {
-        console.log('VK Mini App initialized');
-      })
-      .catch((error) => {
-        console.error('VK Bridge error:', error);
-      });
-  }
-</script>
+<body>
+
+<div class="app">
+
+    <!-- Верхняя панель -->
+    <header class="topbar">
+        <div>
+            <div class="game-title">🔧 Автосервис</div>
+            <div class="game-subtitle">С нуля</div>
+        </div>
+
+        <div class="player-level">
+            <span>Уровень</span>
+            <b id="level">1</b>
+        </div>
+    </header>
+
+    <!-- Характеристики -->
+    <section class="stats">
+
+        <div class="stat">
+            <span>💰</span>
+            <div>
+                <small>Деньги</small>
+                <b id="money">15 000 ₽</b>
+            </div>
+        </div>
+
+        <div class="stat">
+            <span>⭐</span>
+            <div>
+                <small>Репутация</small>
+                <b id="reputation">0</b>
+            </div>
+        </div>
+
+        <div class="stat">
+            <span>🔧</span>
+            <div>
+                <small>Опыт</small>
+                <b id="xp">0 / 100</b>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Основная область -->
+    <main>
+
+        <section class="garage-card">
+
+            <div class="section-title">
+                <h2>🏚️ Твой гараж</h2>
+                <span class="garage-level">Уровень 1</span>
+            </div>
+
+            <div class="garage-image">
+                🔧
+            </div>
+
+            <p class="garage-description">
+                Небольшой гараж, старый верстак и базовый набор инструментов.
+                Здесь начинается твой путь автомеханика.
+            </p>
+
+            <div class="garage-stats">
+                <div>
+                    <span>🚗 Постов</span>
+                    <b>1</b>
+                </div>
+
+                <div>
+                    <span>🧰 Инструменты</span>
+                    <b>Базовые</b>
+                </div>
+
+                <div>
+                    <span>👨‍🔧 Механики</span>
+                    <b>1</b>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Текущий заказ -->
+        <section class="order-card">
+
+            <div class="section-title">
+                <h2>🚗 Текущий заказ</h2>
+                <span class="order-status">Новый клиент</span>
+            </div>
+
+            <div class="car-info">
+
+                <div class="car-icon">
+                    🚗
+                </div>
+
+                <div>
+                    <h3 id="carName">Kia Rio</h3>
+                    <p id="carProblem">
+                        «Машина плохо заводится утром»
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="customer-message">
+                <span>👤 Клиент</span>
+                <p>
+                    «Здравствуйте. Уже несколько дней машина утром
+                    заводится очень тяжело. Иногда приходится долго крутить стартер».
+                </p>
+            </div>
+
+            <button class="main-button" id="startDiagnosis">
+                🔍 Начать диагностику
+            </button>
+
+        </section>
+
+        <!-- Быстрые разделы -->
+        <section class="menu-grid">
+
+            <button class="menu-button" id="trainingButton">
+                <span>📚</span>
+                <b>Обучение</b>
+                <small>Учиться механике</small>
+            </button>
+
+            <button class="menu-button" id="toolsButton">
+                <span>🧰</span>
+                <b>Инструменты</b>
+                <small>Твоё оборудование</small>
+            </button>
+
+            <button class="menu-button" id="carsButton">
+                <span>🚘</span>
+                <b>Автомобили</b>
+                <small>Скоро</small>
+            </button>
+
+            <button class="menu-button" id="serviceButton">
+                <span>🏢</span>
+                <b>СТО</b>
+                <small>Развитие мастерской</small>
+            </button>
+
+        </section>
+
+    </main>
+
+    <!-- Модальное окно -->
+    <div class="modal" id="modal">
+
+        <div class="modal-window">
+
+            <button class="close-button" id="closeModal">
+                ×
+            </button>
+
+            <div id="modalContent"></div>
+
+        </div>
+
+    </div>
+
+    <!-- Уведомления -->
+    <div class="toast" id="toast"></div>
+
+</div>
 
 <script src="game.js"></script>
-<style>
-.heroProfile{display:flex;align-items:center;gap:14px;margin-bottom:18px}
-.heroAvatar{width:64px;height:64px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:38px;background:#eef4ff}
-.heroMain h2{margin:0 0 4px;font-size:26px}
-.heroSub{opacity:.65;font-weight:600}
 
-.profileGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.profileGrid>div{padding:12px;border-radius:16px;background:#f6f8fb}
-.profileGrid span{display:block;font-size:13px;opacity:.65;margin-bottom:5px}
-.profileGrid b{font-size:16px}
-
-.sectionTitle{margin:20px 0 10px;font-size:18px}
-.skill{margin:10px 0}
-.skillHead{display:flex;justify-content:space-between;margin-bottom:5px}
-.skillBar{height:9px;border-radius:10px;background:#e5e9ef;overflow:hidden}
-.skillBar i{display:block;height:100%;border-radius:10px;background:#6b8cff}
-</style>
-
-<script>
-function openHeroProfile(){
-  const skills=[
-    ["💼 Карьера",Math.min(100,s.level*10+Math.floor(s.xp/10))],
-    ["🧠 Интеллект",Math.min(100,20+s.level*5)],
-    ["💪 Форма",Math.min(100,20+Math.max(0,(s.health-80)*2))],
-    ["⭐ Репутация",Math.min(100,s.rep*5)]
-  ];
-
-  const skillHTML=skills.map(x=>`
-    <div class="skill">
-      <div class="skillHead"><span>${x[0]}</span><b>${x[1]}/100</b></div>
-      <div class="skillBar"><i style="width:${x[1]}%"></i></div>
-    </div>
-  `).join("");
-
-  $("modalContent").innerHTML=`
-    <div class="heroProfile">
-      <div class="heroAvatar">🙂</div>
-      <div class="heroMain">
-        <h2>${s.name}</h2>
-        <div class="heroSub">Уровень ${s.level} · ${s.age} лет</div>
-      </div>
-    </div>
-
-    <div class="profileGrid">
-      <div><span>💰 Деньги</span><b>${new Intl.NumberFormat("ru-RU").format(s.money)} ₽</b></div>
-      <div><span>❤️ Здоровье</span><b>${s.health}/100</b></div>
-      <div><span>⚡ Энергия</span><b>${s.energy}/100</b></div>
-      <div><span>⭐ Репутация</span><b>${s.rep}</b></div>
-      <div><span>🚗 Автомобиль</span><b>${s.car}</b></div>
-      <div><span>🏠 Жильё</span><b>${s.home}</b></div>
-    </div>
-
-    <h3 class="sectionTitle">Навыки</h3>
-    ${skillHTML}
-
-    <h3 class="sectionTitle">Опыт</h3>
-    <div class="skillBar">
-      <i style="width:${Math.min(100,s.xp/need()*100)}%"></i>
-    </div>
-    <p>${s.xp} / ${need()} XP до следующего уровня</p>
-  `;
-
-  $("modal").classList.add("show");
-}
-
-$("hero").onclick=openHeroProfile;
-</script>
-</main>
 </body>
-</html>
+</html>.
