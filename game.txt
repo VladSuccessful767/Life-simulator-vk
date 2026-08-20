@@ -1,0 +1,41 @@
+const SAVE_KEY="path_master_v05";
+const DEFAULT={money:15000,energy:100,energyMax:100,rep:0,xp:0,level:1,rate:2000};
+let state={...DEFAULT};try{state={...DEFAULT,...JSON.parse(localStorage.getItem(SAVE_KEY)||"{}")}}catch(e){}
+let accepted=false,diagnosisCount=0,diagnosed=false,offered=false,busy=false;
+const $=id=>document.getElementById(id);
+const money=n=>new Intl.NumberFormat("ru-RU").format(Math.round(n))+" ₽";
+const maxXp=()=>100+(state.level-1)*75;
+function save(){localStorage.setItem(SAVE_KEY,JSON.stringify(state))}
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(window._t);window._t=setTimeout(()=>e.classList.remove("show"),2200)}
+function render(){$("money").textContent=money(state.money);$("energy").textContent=state.energy;$("energyMax").textContent=state.energyMax;$("rep").textContent=state.rep;$("xp").textContent=state.xp;$("xpMax").textContent=maxXp();$("level").textContent=state.level;$("rate").textContent=money(state.rate)}
+function addXp(n){state.xp+=n;while(state.xp>=maxXp()){state.xp-=maxXp();state.level++;state.energyMax+=10;state.energy=state.energyMax;toast("🎉 Новый уровень! Энергия восстановлена.")}}
+const DIAGS=[
+["visual","👁️","Визуальный осмотр",4,"Осмотр течей, повреждений и проводки.","Явных внешних повреждений не обнаружено."],
+["obd","💻","OBD-II",7,"Коды ошибок и текущие параметры.","Есть признаки пропусков воспламенения."],
+["road","🚘","Пробная поездка",10,"Проверка жалобы под нагрузкой.","Цокот проявляется при разгоне примерно с 1700 об/мин."],
+["spark","🔌","Проверка зажигания",9,"Свечи и катушки.","Одна свеча имеет признаки износа."],
+["compression","📟","Компрессия",15,"Состояние цилиндров.","Компрессия в нормальном диапазоне."],
+["fuel","⛽","Топливная система",12,"Подача и давление топлива.","Давление топлива в норме."]
+];
+function buildDiagnostics(){$("diagGrid").innerHTML=DIAGS.map(d=>`<button class="diag" id="d-${d[0]}" onclick="runDiag('${d[0]}')"><b>${d[1]} ${d[2]}</b><small>⚡ ${d[3]} • ${d[4]}</small></button>`).join("")}
+function runDiag(id){if(!accepted||busy||diagnosed)return;const d=DIAGS.find(x=>x[0]===id),b=$("d-"+id);if(b.classList.contains("done"))return;if(state.energy<d[3])return toast("⚡ Недостаточно энергии");state.energy-=d[3];diagnosisCount++;b.classList.add("done");b.disabled=true;$("findings").innerHTML="<b>Полученные признаки</b>"+DIAGS.filter(x=>document.getElementById("d-"+x[0]).classList.contains("done")).map(x=>`<p>• ${x[5]}</p>`).join("");$("diagnoseBtn").disabled=diagnosisCount<3;save();render()}
+function acceptClient(){accepted=true;$("clientStatus").textContent="Автомобиль принят";$("clientDialog").textContent="«Хорошо. Начинайте диагностику, потом обсудим ремонт.»";$("clientActions").innerHTML='<button class="primary" disabled>✅ Заказ принят</button>';$("diagnosisCard").classList.remove("hidden");toast("🤝 Клиент согласовал диагностику");}
+function declineClient(){toast("Клиент уехал. Заказ отклонён.")}
+$("acceptBtn").onclick=acceptClient;$("declineBtn").onclick=declineClient;
+$("diagnoseBtn").onclick=()=>{if(diagnosisCount<3)return;diagnosed=true;$("diagnoseBtn").disabled=true;$("repairPlanCard").classList.remove("hidden");$("repairLines").innerHTML='<div class="repair-line"><span>🔍 Диагностика системы зажигания</span><b>0,5 н/ч</b></div><div class="repair-line"><span>🔩 Замена свечей зажигания</span><b>0,5 н/ч</b></div>';buildParts();calc();toast("🧠 Диагноз сформирован")};
+const PARTS=[["original","Новые оригинальные свечи",6500,"⭐⭐⭐⭐⭐","Максимальное качество."],["analog","Новые свечи — аналог",3900,"⭐⭐⭐⭐","Дешевле оригинала."],["reman","Восстановленные",2200,"⭐⭐⭐","Экономия, ресурс ниже."],["used","Б/У",1200,"⭐⭐","Дешевле всего, состояние неизвестно."]];
+function buildParts(){$("parts").innerHTML=PARTS.map((p,i)=>`<div class="part"><label><input type="radio" name="part" value="${p[0]}" ${i===0?"checked":""} onchange="calc()"><span><b>${p[1]}</b><small>${p[3]}<br>${money(p[2])} • ${p[4]}</small></span></label></div>`).join("")}
+function calc(){const p=PARTS.find(x=>x[0]===(document.querySelector('input[name="part"]:checked')?.value))||PARTS[0],labor=state.rate,total=labor+p[2];$("laborTotal").textContent=money(labor);$("partsTotal").textContent=money(p[2]);$("grandTotal").textContent=money(total)}
+$("rateMinus").onclick=()=>{if(state.rate>1000){state.rate-=250;calc();render();save()}};
+$("ratePlus").onclick=()=>{if(state.rate<5000){state.rate+=250;calc();render();save()}};
+$("offerBtn").onclick=()=>{
+ if(offered)return;
+ const p=PARTS.find(x=>x[0]===(document.querySelector('input[name="part"]:checked')?.value))||PARTS[0],labor=state.rate,total=labor+p[2];
+ let chance=75;if(state.rate>2500)chance-=18;if(state.rate>3500)chance-=25;if(p[0]==="used")chance-=15;if(p[0]==="original")chance+=8;if(state.rep>=20)chance+=8;
+ if(Math.random()*100<=chance){offered=true;$("negotiation").textContent=total>12000?"«Дороговато, но согласен. Делайте.»":"«Цена устраивает. Делаем.»";$("offerBtn").disabled=true;$("repairCard").classList.remove("hidden");$("repairText").textContent=`Клиент согласовал ${money(total)}. Можно начинать ремонт.`;toast("🤝 Клиент согласовал цену!")}else{state.rep=Math.max(0,state.rep-2);$("negotiation").textContent="«Нет, цена меня не устраивает. Давайте другой вариант.»";toast("❌ Клиент отказался");save();render()}
+};
+$("startRepairBtn").onclick=()=>{
+ if(!offered||busy)return;if(state.energy<20)return toast("⚡ Нужно 20 энергии");state.energy-=20;busy=true;let p=0;const timer=setInterval(()=>{p+=5;$("repairProgress").style.width=p+"%";if(p>=100){clearInterval(timer);busy=false;state.money+=5000;state.rep+=4;addXp(55);$("repairText").textContent="✅ Ремонт завершён. Автомобиль проверен и выдан клиенту.";$("startRepairBtn").disabled=true;$("clientStatus").textContent="Заказ выполнен";toast("💰 Клиент оплатил ремонт: +5 000 ₽");save();render()}},90)
+};
+$("closeModal").onclick=()=>$("modal").classList.remove("open");
+buildDiagnostics();render();
