@@ -8,7 +8,12 @@ body {
     padding: 0;
     min-height: 100%;
     font-family: Arial, sans-serif;
-    background: #101318;
+    background-image: url("background.jpg");
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+background-attachment: fixed;
+background-color: #101318;
     color: #f2f4f7;
 }
 
@@ -25,7 +30,7 @@ button {
     max-width: 520px;
     min-height: 100vh;
     margin: 0 auto;
-    background: #171b21;
+    background: rgba(23, 27, 33, 0.88);
     overflow-x: hidden;
 }
 
