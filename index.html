@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#080d12">
+<title>Гараж механика — Car Mechanic</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar cm-topbar">
+  <div class="brand">
+    <div class="brand-icon">🔧</div>
+    <div>
+      <div class="eyebrow">AUTO SERVICE</div>
+      <h1>Гараж механика</h1>
+      <p>Работаешь сам — развиваешь СТО</p>
+    </div>
+  </div>
+  <div class="level-box">
+    <span>Мастерство</span>
+    <b id="level">1</b>
+    <small>ур.</small>
+  </div>
+</header>
+
+<main class="container cm-container">
+
+  <section class="stats-grid cm-stats">
+    <div class="stat-card money"><span>₽</span><small>Баланс</small><b id="money">0 ₽</b></div>
+    <div class="stat-card rep"><span>★</span><small>Репутация</small><b id="reputation">0</b></div>
+    <div class="stat-card xp"><span>XP</span><small>Опыт</small><b id="xp">0 / 100</b></div>
+  </section>
+
+  <section class="card cm-garage-card reveal">
+    <div class="section-title">
+      <div>
+        <div class="eyebrow">ГЛАВНЫЙ ПОСТ</div>
+        <h2>Рабочая зона</h2>
+      </div>
+      <span class="pill garage-level">Уровень 1</span>
+    </div>
+
+    <p class="description">Подними капот, осмотри автомобиль, найди неисправность и верни машину клиенту.</p>
+
+    <div class="garage-image cm-garage-image"></div>
+
+    <div class="cm-order-strip">
+      <div>
+        <small>ТЕКУЩИЙ АВТОМОБИЛЬ</small>
+        <strong id="carName">Нет автомобиля</strong>
+        <span id="carProblem">Ожидание нового клиента</span>
+      </div>
+      <button class="primary-btn cm-start-btn" id="startDiagnosis">Начать работу</button>
+    </div>
+  </section>
+
+  <section class="card cm-tools-card reveal">
+    <div class="section-title">
+      <div>
+        <div class="eyebrow">РАБОЧАЯ ЗОНА</div>
+        <h2>Инструменты</h2>
+      </div>
+      <span class="pill">Готов</span>
+    </div>
+
+    <div class="cm-tool-grid">
+      <button class="cm-tool" onclick="openGarageTools()">
+        <span>🧰</span><b>Оборудование</b><small>Подъёмник, OBD и инструменты</small>
+      </button>
+      <button class="cm-tool" onclick="openGarageParts()">
+        <span>📦</span><b>Запчасти</b><small>Склад и детали для ремонта</small>
+      </button>
+      <button class="cm-tool" onclick="openKnowledgeMenu()">
+        <span>📚</span><b>База знаний</b><small>Диагностика и устройство авто</small>
+      </button>
+      <button class="cm-tool" onclick="openService()">
+        <span>🏢</span><b>Развитие СТО</b><small>Посты и улучшения</small>
+      </button>
+    </div>
+  </section>
+
+  <section class="card cm-progress-card reveal">
+    <div class="section-title">
+      <div>
+        <div class="eyebrow">ПРОГРЕСС</div>
+        <h2>Развитие мастера</h2>
+      </div>
+    </div>
+    <div class="cm-progress-row"><span>Опыт до следующего уровня</span><b id="goalXp">0 / 100</b></div>
+    <div class="cm-progress"><div id="xpBar"></div></div>
+    <div class="cm-progress-row"><span>Касса мастерской</span><b id="goalMoney">0 ₽ / 25 000 ₽</b></div>
+    <div class="cm-progress-row"><span>Склад запчастей</span><b id="warehouseCount">0 деталей</b></div>
+  </section>
+
+  <section class="card cm-order-card reveal">
+    <div class="section-title">
+      <div>
+        <div class="eyebrow">ЗАКАЗ</div>
+        <h2>Текущий клиент</h2>
+      </div>
+      <span class="pill">Работа</span>
+    </div>
+    <div class="cm-order-main">
+      <div>
+        <h3 id="carName2">Автомобиль клиента</h3>
+        <p id="carProblem2">Нажми «Начать работу», чтобы получить заказ.</p>
+      </div>
+      <button class="secondary-btn" id="serviceButton">Развитие СТО</button>
+    </div>
+  </section>
+
+</main>
+
+<div class="modal" id="modal">
+  <div class="modal-window">
+    <button class="close-button" id="closeModal">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="game.js"></script>
+</body>
+</html>
