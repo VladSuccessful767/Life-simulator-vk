@@ -958,3 +958,329 @@ button,input{font-size:inherit !important}
 .knowledge-topic-links{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
 .knowledge-mini-button{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:inherit;border-radius:10px;padding:8px 10px;font-size:12px;cursor:pointer}
 .knowledge-mini-button.studied{border-color:rgba(90,210,120,.35);background:rgba(90,210,120,.10)}
+
+
+/* =========================================================
+   v06 — ЕДИНЫЙ ДИЗАЙН ИГРЫ
+   Главная / СТО / оборудование / склад / заказы / аукцион
+   ========================================================= */
+:root{
+  --bg:#0d1218;
+  --panel:#1b222b;
+  --panel2:#151b22;
+  --panel3:#222b35;
+  --line:#303b47;
+  --text:#f4f6f8;
+  --muted:#9aa6b3;
+  --blue:#3b82f6;
+  --blue2:#2563d8;
+  --green:#27b765;
+  --gold:#f5c84b;
+  --danger:#e04b43;
+  --shadow:0 12px 32px rgba(0,0,0,.28);
+}
+
+html,body{
+  background-color:var(--bg) !important;
+  color:var(--text) !important;
+}
+body{
+  font-family:"Trebuchet MS",Arial,sans-serif !important;
+  background-image:linear-gradient(rgba(8,12,17,.62),rgba(8,12,17,.78)),url("background.jpg") !important;
+}
+.app{
+  max-width:540px !important;
+  background:rgba(13,18,24,.94) !important;
+  box-shadow:0 0 50px rgba(0,0,0,.28);
+}
+
+/* Верхняя шапка */
+.topbar{
+  padding:20px 18px 18px !important;
+  background:linear-gradient(145deg,#202832,#171d25) !important;
+  border-bottom:1px solid #35414e !important;
+}
+.game-title{
+  font-family:Georgia,"Times New Roman",serif !important;
+  font-size:27px !important;
+  letter-spacing:-.3px;
+}
+.game-subtitle{font-size:13px !important;color:#aab4bf !important}
+.player-level{
+  min-width:88px;
+  padding:9px 12px !important;
+  border:1px solid #303b48;
+  border-radius:15px !important;
+  background:#28313c !important;
+  box-shadow:inset 0 1px rgba(255,255,255,.03);
+}
+.player-level b{font-size:22px !important}
+
+/* Статистика */
+.stats{
+  gap:9px !important;
+  padding:13px !important;
+  background:#0f141a !important;
+}
+.stat{
+  min-height:76px;
+  padding:11px 10px !important;
+  border:1px solid #303b47 !important;
+  border-radius:16px !important;
+  background:linear-gradient(145deg,#202832,#1a2028) !important;
+  box-shadow:0 5px 16px rgba(0,0,0,.18);
+}
+.stat > span{font-size:24px !important}
+.stat small{font-size:10px !important;color:#9ba6b2 !important}
+.stat b{font-size:15px !important}
+
+main{padding:13px !important}
+.garage-card,.order-card{
+  padding:16px !important;
+  border:1px solid #303b47 !important;
+  border-radius:20px !important;
+  background:linear-gradient(160deg,#202832,#181e26) !important;
+  box-shadow:var(--shadow) !important;
+}
+.section-title{margin-bottom:13px !important}
+.section-title h2{
+  font-family:Georgia,"Times New Roman",serif !important;
+  font-size:22px !important;
+}
+.garage-level,.order-status{
+  padding:7px 10px !important;
+  border:1px solid #34404c;
+  border-radius:12px !important;
+  background:#2a333e !important;
+  font-size:11px !important;
+}
+
+/* Главная сцена */
+.garage-visual-container{
+  height:305px !important;
+  min-height:305px !important;
+  border-radius:18px !important;
+  border:1px solid #3b4754 !important;
+  background:
+    radial-gradient(circle at 50% 22%,rgba(87,122,150,.18),transparent 34%),
+    linear-gradient(180deg,#28333e 0%,#1a222b 62%,#11161c 100%) !important;
+  box-shadow:inset 0 1px rgba(255,255,255,.04),0 8px 24px rgba(0,0,0,.22);
+}
+.garage-sign{top:37px !important;background:#1b242d !important;border-color:#4a5968 !important;font-size:12px !important}
+.garage-shelf,.garage-workbench{
+  border-color:#465462 !important;
+  background:#171e26 !important;
+  box-shadow:0 5px 14px rgba(0,0,0,.2);
+}
+.garage-car{bottom:61px !important;transform:translateX(-50%) scale(1.03) !important}
+.garage-hint{bottom:11px !important;font-size:11px !important;color:#b7c1cb !important}
+
+/* Кнопки под машиной — как плитки приложения */
+.garage-actions{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:9px !important;
+  margin-top:11px !important;
+}
+.garage-action-button{
+  min-height:54px !important;
+  padding:10px 11px !important;
+  border:1px solid #35414e !important;
+  border-radius:14px !important;
+  background:linear-gradient(145deg,#252e39,#1b222a) !important;
+  color:#f2f5f7 !important;
+  text-align:left !important;
+  font-weight:700 !important;
+  cursor:pointer !important;
+  box-shadow:0 5px 14px rgba(0,0,0,.16);
+  transition:.15s ease;
+}
+.garage-action-button:hover{border-color:#4c86d7 !important;transform:translateY(-1px)}
+.garage-action-button:active{transform:scale(.985)}
+.garage-action-button span{
+  float:right;
+  min-width:24px;
+  padding:3px 6px;
+  border-radius:8px;
+  background:#303b47;
+  color:#cbd5df;
+  text-align:center;
+}
+
+/* Заказы */
+.car-info{
+  padding:13px !important;
+  border:1px solid #303b47;
+  background:#171e26 !important;
+  border-radius:15px !important;
+}
+.car-icon{background:#28323d !important;border:1px solid #384552}
+.customer-message{background:#202933 !important;border-left-color:#4d83d4 !important}
+
+/* Все меню игры */
+.menu-grid{gap:10px !important}
+.menu-button{
+  min-height:112px !important;
+  padding:14px !important;
+  border:1px solid #303b47 !important;
+  border-radius:16px !important;
+  background:linear-gradient(145deg,#202832,#191f27) !important;
+  box-shadow:0 6px 18px rgba(0,0,0,.15);
+}
+.menu-button:hover{border-color:#456b9e !important;background:#222d38 !important}
+.menu-button > span{font-size:27px !important}
+.menu-button b{font-size:15px !important}
+
+/* Общие кнопки */
+.main-button,.action-button{
+  min-height:46px;
+  border-radius:13px !important;
+  background:linear-gradient(180deg,#438df7,#2f73df) !important;
+  box-shadow:0 6px 16px rgba(42,105,208,.18);
+}
+.action-button.secondary-button,.secondary-button{background:#303a46 !important}
+.modal-back-button{border-radius:13px !important;background:#2b3540 !important}
+
+/* Модальные окна */
+.modal{padding:10px !important;background:rgba(4,8,12,.76) !important;backdrop-filter:blur(4px)}
+.modal-window{
+  max-width:540px !important;
+  padding:18px !important;
+  border:1px solid #3a4653 !important;
+  border-radius:22px 22px 15px 15px !important;
+  background:linear-gradient(160deg,#202832,#171d24) !important;
+  box-shadow:0 -15px 45px rgba(0,0,0,.45) !important;
+}
+.modal-window h2{font-family:Georgia,"Times New Roman",serif !important;font-size:23px !important}
+
+/* Оборудование */
+.tool-grid{gap:10px !important}
+.tool-card{
+  padding:15px !important;
+  border:1px solid #303c48 !important;
+  border-radius:17px !important;
+  background:linear-gradient(145deg,#1e2730,#171e25) !important;
+}
+.tool-card.owned{border-color:#3e6c83 !important}
+.tool-level{background:#2a3541 !important}
+
+/* Знания / обучение */
+.knowledge-category,.knowledge-topic,.training-test-card,.knowledge-block,.knowledge-practice,.knowledge-future{
+  border-radius:15px !important;
+  background:linear-gradient(145deg,#1c252e,#161c23) !important;
+  border-color:#303c48 !important;
+}
+.knowledge-category:hover,.knowledge-topic:hover{border-color:#466b9e !important}
+.knowledge-search input,.price-input{background:#11171e !important;border-color:#34414e !important;border-radius:12px !important}
+
+/* Запчасти */
+.part-option,.upgrade-card,.markup-panel,.customer-choice{
+  border-radius:15px !important;
+  background:linear-gradient(145deg,#1d262f,#171e25) !important;
+  border-color:#303d49 !important;
+}
+.part-option.selected{border-color:#4d91f7 !important;background:#1b2b40 !important}
+
+/* =========================================================
+   АУКЦИОН — тот же визуальный язык, что и главная
+   ========================================================= */
+.auction-screen,.auction-inspection-screen{
+  font-family:"Trebuchet MS",Arial,sans-serif !important;
+  color:#eef3f8 !important;
+  background:linear-gradient(180deg,#111820,#0d131a) !important;
+  padding:15px !important;
+}
+.auction-header{
+  grid-template-columns:1fr auto auto !important;
+  padding:4px 0 15px !important;
+  border-bottom:1px solid #303c48 !important;
+}
+.auction-header h2{font-family:Georgia,"Times New Roman",serif !important;font-size:24px !important}
+.auction-budget{
+  padding:9px 12px !important;
+  border:1px solid #354352 !important;
+  border-radius:12px !important;
+  background:#202a34 !important;
+}
+.auction-day{padding:8px 10px !important;border-radius:10px !important;background:#1b242d !important}
+.auction-filters{gap:7px !important;margin:12px 0 !important;overflow-x:auto;padding-bottom:2px}
+.auction-filter{
+  border:1px solid #344250 !important;
+  border-radius:10px !important;
+  background:#1a232c !important;
+  color:#b8c3ce !important;
+  white-space:nowrap;
+}
+.auction-filter.active{background:#347ff0 !important;border-color:#4d91f7 !important;color:#fff !important}
+.auction-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:10px !important}
+.auction-card-modern,.auction-card{
+  border:1px solid #303e4b !important;
+  border-radius:17px !important;
+  background:linear-gradient(160deg,#202a34,#151c23) !important;
+  box-shadow:0 8px 22px rgba(0,0,0,.22) !important;
+}
+.auction-photo-wrap{height:132px !important;background:linear-gradient(145deg,#2a3744,#131a21) !important}
+.auction-card-body{padding:11px !important}
+.auction-card-body h3{font-family:Georgia,"Times New Roman",serif !important;font-size:16px !important}
+.auction-specs{font-size:10px !important}
+.auction-condition{background:#2a3540 !important}
+.auction-card-actions{gap:7px !important}
+.auction-inspect-button,.auction-buy-button,.auction-back-button,.auction-danger-button{
+  min-height:39px !important;
+  border-radius:11px !important;
+  border:1px solid rgba(255,255,255,.06) !important;
+}
+.auction-inspect-button{background:#315f9f !important}
+.auction-buy-button{background:linear-gradient(180deg,#2dc16b,#229c57) !important;color:#fff !important}
+.auction-back-button{background:#2b3642 !important}
+.auction-danger-button{background:#c9413a !important}
+.auction-legend{border-color:#303c48 !important}
+.auction-inspection-layout{gap:11px !important}
+.auction-car-summary,.auction-diagnostics{
+  border:1px solid #303e4b !important;
+  border-radius:17px !important;
+  background:linear-gradient(160deg,#202a34,#171e25) !important;
+  box-shadow:0 8px 22px rgba(0,0,0,.18);
+}
+.auction-big-photo{border-radius:13px !important;background:#111820 !important}
+.auction-diagnostic-grid{gap:8px !important}
+.auction-diagnostic-card{
+  border:1px solid #303e4b !important;
+  border-radius:13px !important;
+  background:#151e26 !important;
+}
+.auction-diagnostic-card.available:hover{border-color:#4d91f7 !important;background:#1a2632 !important}
+.auction-found-box,.auction-info-box{border:1px solid #30404d !important;border-radius:13px !important;background:#111920 !important}
+.auction-main-buy{border-radius:13px !important;background:linear-gradient(180deg,#2dc16b,#229c57) !important}
+.auction-confirm{border-radius:17px !important}
+
+/* Премиум */
+.premium-card{border-radius:16px !important;background:linear-gradient(145deg,#202932,#171e25) !important}
+
+/* Мобильная адаптация */
+@media(max-width:520px){
+  .game-title{font-size:24px !important}
+  .stats{grid-template-columns:repeat(3,1fr) !important}
+  .stat{min-height:72px !important}
+  .garage-visual-container{height:292px !important;min-height:292px !important}
+  .garage-car{transform:translateX(-50%) scale(.96) !important;bottom:59px !important}
+  .garage-actions{grid-template-columns:1fr 1fr !important}
+  .garage-action-button{font-size:12px !important;min-height:52px !important}
+  .auction-screen,.auction-inspection-screen{padding:11px !important}
+  .auction-header{grid-template-columns:1fr auto !important}
+  .auction-day{display:none !important}
+  .auction-refresh-button{grid-column:1/-1 !important;width:100% !important}
+  .auction-grid{grid-template-columns:1fr 1fr !important}
+  .auction-photo-wrap{height:108px !important}
+  .auction-card-body h3{font-size:14px !important}
+  .auction-diagnostic-grid{grid-template-columns:1fr 1fr !important}
+}
+@media(max-width:390px){
+  .stats{gap:6px !important;padding:9px !important}
+  .stat{padding:9px 6px !important}
+  .stat > span{font-size:19px !important}
+  .stat b{font-size:11px !important}
+  .garage-actions{grid-template-columns:1fr !important}
+  .auction-grid{grid-template-columns:1fr !important}
+  .auction-diagnostic-grid{grid-template-columns:1fr !important}
+}
