@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Автомастерская V16</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><b>АВТОМАСТЕРСКАЯ</b><span>V16</span><small>REAL GARAGE SIMULATOR • DIAGNOSTICS & FLIP</small></div>
+  <div class="stats">
+    <div>💰 <b id="money">0</b> ₽</div><div>⭐ <b id="level">1</b></div>
+    <div>🏆 <b id="rep">50</b></div><div>📅 <b id="day">1</b></div>
+  </div>
+</header>
+<div class="shell">
+<aside class="sidebar">
+  <button class="nav active" data-tab="garage">🏭 Гараж</button>
+  <button class="nav" data-tab="orders">📋 Заказы <i id="badge">0</i></button>
+  <button class="nav" data-tab="repair">🔧 Ремонт</button>
+  <button class="nav" data-tab="diagnostics">🔎 Диагностика</button>
+  <button class="nav" data-tab="auction">🔨 Аукцион</button>
+  <button class="nav" data-tab="parts">🧰 Запчасти</button>
+  <button class="nav" data-tab="tires">🛞 Шиномонтаж</button>
+  <button class="nav" data-tab="staff">👨‍🔧 Персонал</button>
+  <button class="nav" data-tab="upgrade">⚙️ Мастерская</button>
+  <button class="nav" data-tab="finance">💼 Финансы</button>
+  <button class="nav" data-tab="network">🏢 Сеть</button>
+  <button class="nav" data-tab="profile">👤 Профиль</button>
+  <button class="nav premiumNav" data-tab="shop">💎 Магазин</button>
+  <div class="tip"><b>V16</b><br>V16: глубокая диагностика, подтверждение неисправностей и расширенный шинный сервис.</div>
+</aside>
+<main class="main">
+  <section id="tab-garage" class="tab active"></section>
+  <section id="tab-orders" class="tab"></section>
+  <section id="tab-repair" class="tab"></section>
+  <section id="tab-diagnostics" class="tab"></section>
+  <section id="tab-auction" class="tab"></section>
+  <section id="tab-parts" class="tab"></section>
+  <section id="tab-tires" class="tab"></section>
+  <section id="tab-staff" class="tab"></section>
+  <section id="tab-upgrade" class="tab"></section>
+  <section id="tab-finance" class="tab"></section>
+  <section id="tab-network" class="tab"></section>
+  <section id="tab-profile" class="tab"></section>
+  <section id="tab-shop" class="tab"></section>
+</main>
+</div>
+<div id="modal" class="modal hidden"><div class="modalBox"><button class="x" onclick="closeModal()">×</button><div id="modalBody"></div></div></div>
+<script src="game.js"></script>
+</body>
+</html>
